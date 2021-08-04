@@ -1,6 +1,5 @@
-import skbio
-
 from .model import load_model
+from .sequence import chunk_sequences
 
 def predict(sequences=None, **kwargs):
     if fasta_path is None:
@@ -8,7 +7,7 @@ def predict(sequences=None, **kwargs):
 
     model = load_model()
 
-    for seq in skbio.io.read(fasta_path):
+    for seq in chunk_sequences(fasta_path):
         # 1. chunk sequences
         # 2. pass chunks into model
         # 3. softmax outputs
