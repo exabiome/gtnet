@@ -16,8 +16,6 @@ with open('README.md', 'r') as fp:
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
-schema_dir = 'schema'
-
 # reqs_re = re.compile("[<=>]+")
 # with open('requirements.txt', 'r') as fp:
 #     reqs = [reqs_re.split(x.strip())[0] for x in fp.readlines()]
@@ -45,7 +43,7 @@ setup_args = {
     'install_requires': reqs,
     'packages': pkgs,
     # 'package_dir': {'': 'src'},
-    # 'package_data': {'gtnet': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    'package_data': {'gtnet': ["data/*.onnx"]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
