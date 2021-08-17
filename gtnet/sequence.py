@@ -27,7 +27,6 @@ def _get_DNA_map():
 
 #this will just pull all the sequences from a fasta file
 def get_sequences(path):
-    #return [seq.values.view(np.uint8) for seq in skbio.io.read(path, format='fasta')]
     return [seq.values for seq in skbio.io.read(path, format='fasta')]
 
 #this will produce a list featuring chunks of the sequence
@@ -37,7 +36,6 @@ def chunk_seq(sequence, size):
 
 #this will map each item onto our basemap from above
 def map_seq(chunked_sequence, basemap):
-    #return basemap[np.array(chunked_sequence)]#.view(np.uint8)]
     return basemap[np.vectorize(ord)(np.array(chunked_sequence))]
 
 #this will return the reverse complementary strand    
@@ -46,8 +44,7 @@ def get_rev_comp(chunks, chars):
     return np.vectorize(chars_dict.get)((chunks + 9) %18)
 
 #combines fxns above into a single array with chunks in both directons
-def get_bidir_seq(sequence, size=4096):
-    chars, basemap = _get_DNA_map()
+def get_bidir_seq(sequence, chars, basemap, size=4096):
     chunks = chunk_seq(sequence, size)
     fwd_chunk_mapped = map_seq(chunks, basemap).astype(int)
     rev_chunked = get_rev_comp(fwd_chunk_mapped, chars)
