@@ -3,10 +3,11 @@ import skbio
 
 __all__ = ['_get_DNA_map',
            'get_sequences',
-          'chunk_seq',
+           'chunk_seq',
            'map_seq',
            'get_rev_comp',
-          'get_bidir_seq']
+           'get_bidir_seq']
+
 
 def _get_DNA_map():
     '''
@@ -20,30 +21,36 @@ def _get_DNA_map():
     chars = ('ACYWSKDVN'
              'TGRWSMHBN')
     basemap = np.zeros(128, dtype=np.uint8)
-    for i, c in reversed(list(enumerate(chars))):  # reverse so we store the lowest for self-complementary codes
+    # reverse so we store the lowest for self-complementary codes
+    for i, c in reversed(list(enumerate(chars))):
         basemap[ord(c)] = i
         basemap[ord(c.lower())] = i
     return chars, basemap
 
-#this will just pull all the sequences from a fasta file
+
+# this will just pull all the sequences from a fasta file
 def get_sequences(path):
     return [seq.values for seq in skbio.io.read(path, format='fasta')]
 
-#this will produce a list featuring chunks of the sequence
+
+# this will produce a list featuring chunks of the sequence
 def chunk_seq(sequence, size):
     num_windows = len(sequence)//size
     return [sequence[size*i: size*(i+1)] for i in range(num_windows)]
 
-#this will map each item onto our basemap from above
+
+# this will map each item onto our basemap from above
 def map_seq(chunked_sequence, basemap):
     return basemap[np.vectorize(ord)(np.array(chunked_sequence))]
 
-#this will return the reverse complementary strand    
-def get_rev_comp(chunks, chars):
-    chars_dict = {i:v for i,v in enumerate(chars)}
-    return np.vectorize(chars_dict.get)((chunks + 9) %18)
 
-#combines fxns above into a single array with chunks in both directons
+# this will return the reverse complementary strand
+def get_rev_comp(chunks, chars):
+    chars_dict = {i: v for i, v in enumerate(chars)}
+    return np.vectorize(chars_dict.get)((chunks + 9) % 18)
+
+
+# combines fxns above into a single array with chunks in both directons
 def get_bidir_seq(sequence, chars, basemap, size=4096):
     chunks = chunk_seq(sequence, size)
     fwd_chunk_mapped = map_seq(chunks, basemap).astype(int)
