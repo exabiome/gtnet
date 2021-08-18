@@ -1,16 +1,8 @@
 from model import load_model
 from sequence import _get_DNA_map, get_sequences, get_bidir_seq
 import numpy as np
-import scipy.special
 import argparse
 import logging
-
-
-# should this be in another file?
-def get_prob(x):
-    soft_out = scipy.special.softmax(x)
-    probabilities = soft_out.mean(axis=0)
-    return probabilities
 
 
 def predict(fasta_path, model_path, **kwargs):
@@ -21,13 +13,14 @@ def predict(fasta_path, model_path, **kwargs):
     model = load_model(model_path)
     input_name = model.get_inputs()[0].name
     chars, basemap = _get_DNA_map()
+    rcmap = np.array([9, 10, 11, 12, 13, 14, 15, 16, 17,
+                      0,  1,  2,  3,  4,  5,  6,  7,  8])
+
     for seq in get_sequences(fasta_path, basemap):
         # 1. chunk sequences
-        bidir_seq = get_bidir_seq(seq)
+        bidir_seq = get_bidir_seq(seq, rcmap)
         # 2. pass chunks into model
         output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
-        # 3. get probalities
-        probabilities = get_prob(output)
 
 
 def main():

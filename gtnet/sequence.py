@@ -33,22 +33,21 @@ def get_sequences(path, basemap):
     return [basemap[seq.view(np.int8)] for seq in seqs]
 
 
-# this will produce a list featuring chunks of the sequence
-def chunk_seq(sequence, size):
-    num_windows = len(sequence)//size
-    return np.stack([sequence[size*i: size*(i+1)] for i in range(num_windows)])
+# this will pad + chunk sequence and return numpy array
+def chunk_seq(seq, size=4096):
+    padding_len = size - len(seq) % 4096
+    seq = np.pad(seq, (0, padding_len), constant_values=(0, 8))
+    return seq.reshape((-1, size))
 
 
 # this will return the reverse complementary strand
-def get_rev_seq(seq):
-    rcmap = np.array([9, 10, 11, 12, 13, 14, 15, 16, 17,
-                      0,  1,  2,  3,  4,  5,  6,  7,  8])
+def get_rev_seq(seq, rcmap):
     return rcmap[np.flip(seq)]
 
 
 # combines fxns above into a single array with chunks in both directons
-def get_bidir_seq(fwd_seq):
-    rev_seq = get_rev_seq(fwd_seq)
+def get_bidir_seq(fwd_seq, rcmap):
+    rev_seq = get_rev_seq(fwd_seq, rcmap)
     fwd_chunks = chunk_seq(fwd_seq, 4096)
     rev_chunks = chunk_seq(rev_seq, 4096)
     return np.append(fwd_chunks, rev_chunks, axis=0)
