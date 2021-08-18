@@ -5,6 +5,7 @@ import scipy.special
 import argparse
 import logging
 
+
 # should this be in another file?
 def get_prob(x):
     soft_out = scipy.special.softmax(x)
@@ -12,21 +13,17 @@ def get_prob(x):
     return probabilities
 
 
-default_fasta_path = '/global/cscratch1/sd/azaidi/GCA_000006155.2_ASM615v2_genomic.fna'
-
-
 def predict(fasta_path, model_path, **kwargs):
     if fasta_path is None:
-        print(f'no fasta file was provided, \
-              using {default_fasta_path} to proceed')
-        fasta_path = default_fasta_path
+        logging.error('Please provide a fasta path!')
+        exit()
 
     model = load_model(model_path)
     input_name = model.get_inputs()[0].name
     chars, basemap = _get_DNA_map()
-    for seq in get_sequences(fasta_path):
+    for seq in get_sequences(fasta_path, basemap):
         # 1. chunk sequences
-        bidir_seq = get_bidir_seq(seq, chars, basemap)
+        bidir_seq = get_bidir_seq(seq)
         # 2. pass chunks into model
         output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
         # 3. get probalities

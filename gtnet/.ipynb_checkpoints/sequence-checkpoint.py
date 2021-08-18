@@ -4,8 +4,7 @@ import skbio
 __all__ = ['_get_DNA_map',
            'get_sequences',
            'chunk_seq',
-           'map_seq',
-           'get_rev_comp',
+           'get_rev_seq',
            'get_bidir_seq']
 
 
@@ -29,32 +28,27 @@ def _get_DNA_map():
 
 
 # this will just pull all the sequences from a fasta file
-def get_sequences(path):
-    return [seq.values for seq in skbio.io.read(path, format='fasta')]
+def get_sequences(path, basemap):
+    seqs = [seq.values for seq in skbio.io.read(path, format='fasta')]
+    return [basemap[seq.view(np.int8)] for seq in seqs]
 
 
 # this will produce a list featuring chunks of the sequence
 def chunk_seq(sequence, size):
     num_windows = len(sequence)//size
-    return [sequence[size*i: size*(i+1)] for i in range(num_windows)]
-
-
-# this will map each item onto our basemap from above
-def map_seq(chunked_sequence, basemap):
-    return basemap[np.vectorize(ord)(np.array(chunked_sequence))]
+    return np.stack([sequence[size*i: size*(i+1)] for i in range(num_windows)])
 
 
 # this will return the reverse complementary strand
-def get_rev_comp(chunks, chars):
-    chars_dict = {i: v for i, v in enumerate(chars)}
-    return np.vectorize(chars_dict.get)((chunks + 9) % 18)
+def get_rev_seq(seq):
+    rcmap = np.array([9, 10, 11, 12, 13, 14, 15, 16, 17,
+                      0,  1,  2,  3,  4,  5,  6,  7,  8])
+    return rcmap[np.flip(seq)]
 
 
 # combines fxns above into a single array with chunks in both directons
-def get_bidir_seq(sequence, chars, basemap, size=4096):
-    chunks = chunk_seq(sequence, size)
-    fwd_chunk_mapped = map_seq(chunks, basemap).astype(int)
-    rev_chunked = get_rev_comp(fwd_chunk_mapped, chars)
-    rev_chunk_mapped = map_seq(rev_chunked, basemap).astype(int)
-    bi_seq = np.append(fwd_chunk_mapped, rev_chunk_mapped, axis=0)
-    return bi_seq
+def get_bidir_seq(fwd_seq):
+    rev_seq = get_rev_seq(fwd_seq)
+    fwd_chunks = chunk_seq(fwd_seq, 4096)
+    rev_chunks = chunk_seq(rev_seq, 4096)
+    return np.append(fwd_chunks, rev_chunks, axis=0)
