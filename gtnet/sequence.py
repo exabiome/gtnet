@@ -59,26 +59,34 @@ def _get_DNA_map(vocab=None):
     return vocab, basemap, rcmap
 
 
-# this will just pull all the sequences from a fasta file
 def get_sequences(path, basemap):
+    """
+    this will just pull all the sequences from a fasta file
+    """
     seqs = [seq.values for seq in skbio.io.read(path, format='fasta')]
     return [basemap[seq.view(np.int8)] for seq in seqs]
 
 
-# this will pad + chunk sequence and return numpy array
 def chunk_seq(seq, chunk_size, pad_value):
+    """
+    this will pad + chunk sequence and return numpy array
+    """
     padding_len = chunk_size - len(seq) % chunk_size
     seq = np.pad(seq, (0, padding_len), constant_values=(0, pad_value))
     return seq.reshape((-1, chunk_size))
 
 
-# this will return the reverse complementary strand
 def get_rev_seq(seq, rcmap):
+    """
+    this will return the reverse complementary strand
+    """
     return rcmap[np.flip(seq)]
 
 
-# combines fxns above into a single array with chunks in both directons
 def get_bidir_seq(fwd_seq, rcmap, chunk_size, pad_value):
+    """
+    combines fxns above into a single array with chunks in both directons
+    """
     rev_seq = get_rev_seq(fwd_seq, rcmap)
     fwd_chunks = chunk_seq(fwd_seq, chunk_size, pad_value)
     rev_chunks = chunk_seq(rev_seq, chunk_size, pad_value)
