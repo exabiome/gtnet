@@ -5,7 +5,7 @@ import argparse
 import logging
 
 
-def predict(fasta_path, model_path, **kwargs):
+def predict(fasta_path, model_path, vocab, **kwargs):
     if fasta_path is None:
         logging.error('Please provide a fasta path!')
         exit()
@@ -31,8 +31,11 @@ def main():
                         default=None, help='sequence path')
     parser.add_argument('-m', '--model_path', type=str,
                         default=None, help='path to onnx model')
+    parser.add_argument('-v', '--vocab', type=str,
+                        default=None, help='vocabulary')
     args = parser.parse_args()
-    predict(fasta_path=args.fasta_path, model_path=args.model_path)
+    predict(fasta_path=args.fasta_path, model_path=args.model_path,
+            vocab=args.vocab)
     logging.info('finished!')
 
 

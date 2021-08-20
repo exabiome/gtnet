@@ -28,7 +28,7 @@ def get_revcomp_map(vocab):
         'X': 'X',
         'N': 'N',
     }
-    
+
     d = {c: i for i, c in enumerate(vocab)}
     rcmap = np.zeros(len(vocab), dtype=int)
     for i, base in enumerate(vocab):
