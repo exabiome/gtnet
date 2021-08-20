@@ -12,13 +12,12 @@ def predict(fasta_path, model_path, **kwargs):
 
     model = load_model(model_path)
     input_name = model.get_inputs()[0].name
-    chars, basemap = _get_DNA_map()
-    rcmap = np.array([9, 10, 11, 12, 13, 14, 15, 16, 17,
-                      0,  1,  2,  3,  4,  5,  6,  7,  8])
+    chars, basemap, rcmap = _get_DNA_map()
 
     for seq in get_sequences(fasta_path, basemap):
         # 1. chunk sequences
-        bidir_seq = get_bidir_seq(seq, rcmap)
+        bidir_seq = get_bidir_seq(seq, rcmap, chunk_size=4096,
+                                  pad_value=8)
         # 2. pass chunks into model
         output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
 
