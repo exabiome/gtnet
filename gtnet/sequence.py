@@ -56,6 +56,7 @@ def _get_DNA_map(vocab=None):
     for i, c in reversed(list(enumerate(vocab))):
         basemap[ord(c)] = i
         basemap[ord(c.lower())] = i
+    basemap[ord('x')] = basemap[ord('X')] = basemap[ord('n')]
     return vocab, basemap, rcmap
 
 
