@@ -4,7 +4,7 @@ import onnxruntime as rt
 
 
 # assume this is filled in and is a path to an ONNX file
-PRETRAINED_MODEL_PATH = 'data/bac120_r202.resnet50.genus.onnx'
+PRETRAINED_MODEL_PATH = 'models/bac120_r202.resnet50.genus.onnx'
 
 
 def _get_model_path(domain):
