@@ -3,10 +3,6 @@ from pkg_resources import resource_filename
 import onnxruntime as rt
 
 
-# assume this is filled in and is a path to an ONNX file
-PRETRAINED_MODEL_PATH = 'models/bac120_r202.resnet50.genus.onnx'
-
-
 def _get_model_path(domain):
     """
     Get the path to the ONNX model file for a given domain
@@ -30,10 +26,8 @@ def _get_model_path(domain):
     return os.path.join(resource_filename(__name__, 'models'), path)
 
 
-def load_model(model_path=None):
+def load_model(model_path=None, domain='bacteria'):
     if model_path is None:
-        print(f'a model path was not provided, \
-                using {PRETRAINED_MODEL_PATH} to proceed')
-        model_path = PRETRAINED_MODEL_PATH
+        model_path = _get_model_path(domain)
     model = rt.InferenceSession(model_path)
     return model

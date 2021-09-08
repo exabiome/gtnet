@@ -24,7 +24,7 @@ reqs = [
     'numpy',
     'scipy',
     'scikit-learn',
-    #'scikit-bio',
+    'scikit-bio',
     'hdmf',
 ]
 
@@ -43,7 +43,7 @@ setup_args = {
     'install_requires': reqs,
     'packages': pkgs,
     # 'package_dir': {'': 'src'},
-    'package_data': {'gtnet': ["data/*.onnx"]},
+    'package_data': {'gtnet': ["models/*.onnx"]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",

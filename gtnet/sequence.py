@@ -1,6 +1,7 @@
 import numpy as np
 import skbio
 
+
 __all__ = ['_get_DNA_map',
            'get_sequences',
            'chunk_seq',
@@ -10,6 +11,11 @@ __all__ = ['_get_DNA_map',
 
 
 def get_revcomp_map(vocab):
+    '''
+    Based on desired vocabulary, will return a numpy array
+    to be used for reverse complement mapping -- default vocab
+    can be found in _get_DNA_map function below
+    '''
     chars = {
         'A': 'T',
         'G': 'C',
@@ -62,7 +68,10 @@ def _get_DNA_map(vocab=None):
 
 def get_sequences(path, basemap):
     """
-    this will just pull all the sequences from a fasta file
+    (1) pull all the sequences from a fasta file with scikit-bio
+    (2) return a list of the sequences mapped to 8 bit integers via
+    the provided basemap -- each item in list is a numpy array
+    * this will return a jagged array *
     """
     seqs = [seq.values for seq in skbio.io.read(path, format='fasta')]
     return [basemap[seq.view(np.int8)] for seq in seqs]
@@ -70,7 +79,11 @@ def get_sequences(path, basemap):
 
 def chunk_seq(seq, chunk_size, pad_value):
     """
-    this will pad + chunk sequence and return numpy array
+    (1) determine the padding length required from provided chunk size
+    (2) pad sequence on right side only with specified padding value
+    (3) reshape the sequence to have rows with length of chunk size
+    *only padding once on full sequence -- this ensures entire sequence
+    is divisible by the chunk size*
     """
     padding_len = chunk_size - len(seq) % chunk_size
     seq = np.pad(seq, (0, padding_len), constant_values=(0, pad_value))
@@ -79,14 +92,17 @@ def chunk_seq(seq, chunk_size, pad_value):
 
 def get_rev_seq(seq, rcmap):
     """
-    this will return the reverse complementary strand
+    (1) flips the sequence and does a index lookup in one operation
+    with our reverse complement map
     """
     return rcmap[np.flip(seq)]
 
 
 def get_bidir_seq(fwd_seq, rcmap, chunk_size, pad_value):
     """
-    combines fxns above into a single array with chunks in both directons
+    (1) determines the reverse complement of fwd sequence
+    (2) chunk both forward and reverse sequences
+    (3) append fwd and reverse sequence into one array
     """
     rev_seq = get_rev_seq(fwd_seq, rcmap)
     fwd_chunks = chunk_seq(fwd_seq, chunk_size, pad_value)
