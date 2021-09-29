@@ -1,14 +1,43 @@
-from .model import load_model
-from .sequence import chunk_sequences
+from model import load_model
+from sequence import _get_DNA_map, get_sequences, get_bidir_seq
+import numpy as np
+import argparse
+import logging
 
-def predict(sequences=None, **kwargs):
+
+def predict(fasta_path, model_path, vocab, **kwargs):
     if fasta_path is None:
-        raise ValueError('sequences must not be None')
+        logging.error('Please provide a fasta path!')
+        exit()
 
-    model = load_model()
+    model = load_model(model_path)
+    input_name = model.get_inputs()[0].name
+    chars, basemap, rcmap = _get_DNA_map()
 
-    for seq in chunk_sequences(fasta_path):
+    for seq in get_sequences(fasta_path, basemap):
         # 1. chunk sequences
+        bidir_seq = get_bidir_seq(seq, rcmap, chunk_size=4096,
+                                  pad_value=8)
         # 2. pass chunks into model
-        # 3. softmax outputs
-        # 4. return probabilities
+        output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
+
+
+def main():
+    logging.getLogger().setLevel(logging.INFO)
+    logging.basicConfig(format='%(levelname)s-%(message)s')
+    logging.info('starting')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--fasta_path', type=str,
+                        default=None, help='sequence path')
+    parser.add_argument('-m', '--model_path', type=str,
+                        default=None, help='path to onnx model')
+    parser.add_argument('-v', '--vocab', type=str,
+                        default=None, help='vocabulary')
+    args = parser.parse_args()
+    predict(fasta_path=args.fasta_path, model_path=args.model_path,
+            vocab=args.vocab)
+    logging.info('finished!')
+
+
+if __name__ == '__main__':
+    main()
