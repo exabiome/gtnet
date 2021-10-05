@@ -31,7 +31,8 @@ reqs = [
 print(reqs)
 
 setup_args = {
-    'version': get_git_revision_short_hash(),
+    'cmdclass': {'get_models': DownloadModels},
+    # 'version': get_git_revision_short_hash(),
     'name': 'gtnet',
     'description': 'A package for running Genome Taxonomy Network predictions',
     'long_description': readme,
