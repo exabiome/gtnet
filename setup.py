@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from setuptools import setup, find_packages
+import os
 import re
+import requests
 import subprocess
+
+from setuptools import setup, find_packages, Command
 
 def get_git_revision_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
@@ -14,21 +16,32 @@ with open('README.md', 'r') as fp:
     readme = fp.read()
 
 pkgs = find_packages('src', exclude=['data'])
-print('found these packages:', pkgs)
-
-# reqs_re = re.compile("[<=>]+")
-# with open('requirements.txt', 'r') as fp:
-#     reqs = [reqs_re.split(x.strip())[0] for x in fp.readlines()]
 
 reqs = [
     'numpy',
     'scipy',
     'scikit-learn',
-    #'scikit-bio',
+    'scikit-bio',
     'hdmf',
 ]
 
-print(reqs)
+class DownloadModels(Command):
+    """Custom build command."""
+
+    description = "Download model files"
+
+    required = [
+        { 'path': 'gtnet/models/ar122.onnx', 'url': 'https://osf.io/yu738/download' }
+    ]
+
+    def run(self):
+        for d in self.required:
+            if not os.path.exists(d['path']):
+                print(f'Downloading {d["path"]} from {d["url"]}')
+                r = requests.get(d['url'], allow_redirects=True)
+                with open(d['path'], 'wb') as f:
+                    f.write(r.content)
+        super().run()
 
 setup_args = {
     'cmdclass': {'get_models': DownloadModels},
@@ -44,7 +57,7 @@ setup_args = {
     'install_requires': reqs,
     'packages': pkgs,
     # 'package_dir': {'': 'src'},
-    'package_data': {'gtnet': ["data/*.onnx"]},
+    'package_data': {'gtnet': ["models/*.onnx"]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
@@ -71,6 +84,7 @@ setup_args = {
                 'reproducible-research ',
     'zip_safe': False
 }
+
 
 if __name__ == '__main__':
     setup(**setup_args)
