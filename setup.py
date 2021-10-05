@@ -30,6 +30,8 @@ class DownloadModels(Command):
 
     description = "Download model files"
 
+    user_options = list()
+
     required = [
         { 'path': 'gtnet/models/ar122.onnx', 'url': 'https://osf.io/yu738/download' }
     ]
@@ -41,7 +43,22 @@ class DownloadModels(Command):
                 r = requests.get(d['url'], allow_redirects=True)
                 with open(d['path'], 'wb') as f:
                     f.write(r.content)
-        super().run()
+            else:
+                print(f'{d["path"]} already exists, skipping download')
+
+    def initialize_options(self):
+        pass
+#        self.commands = []
+#        for C in commands:
+#            self.commands.append(C(self.distribution))
+#        for c in self.commands:
+#            c.initialize_options()
+
+    def finalize_options(self):
+        pass
+#        for c in self.commands:
+#            c.finalize_options()
+
 
 setup_args = {
     'cmdclass': {'get_models': DownloadModels},
@@ -82,8 +99,12 @@ setup_args = {
                 'open-source '
                 'open-science '
                 'reproducible-research ',
-    'zip_safe': False
+    'zip_safe': False,
+#    entry_points={
+#        'console_scripts': ['my-command=exampleproject.example:main']
+#    },
 }
+
 
 
 if __name__ == '__main__':
