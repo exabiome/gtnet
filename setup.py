@@ -6,6 +6,7 @@ import subprocess
 
 from setuptools import setup, find_packages, Command
 
+
 def get_git_revision_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
@@ -24,40 +25,6 @@ reqs = [
     'scikit-bio',
     'hdmf',
 ]
-    
-class DownloadModels(Command):
-    """Custom build command."""
-
-    description = "Download model files"
-
-    user_options = list()
-
-    required = [
-        { 'path': 'gtnet/models/ar122.onnx', 'url': 'https://osf.io/yu738/download' }
-    ]
-
-    def run(self):
-        for d in self.required:
-            if not os.path.exists(d['path']):
-                print(f'Downloading {d["path"]} from {d["url"]}')
-                r = requests.get(d['url'], allow_redirects=True)
-                with open(d['path'], 'wb') as f:
-                    f.write(r.content)
-            else:
-                print(f'{d["path"]} already exists, skipping download')
-
-    def initialize_options(self):
-        pass
-#        self.commands = []
-#        for C in commands:
-#            self.commands.append(C(self.distribution))
-#        for c in self.commands:
-#            c.initialize_options()
-
-    def finalize_options(self):
-        pass
-#        for c in self.commands:
-#            c.finalize_options()
 
 
 setup_args = {
