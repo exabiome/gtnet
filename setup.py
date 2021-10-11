@@ -24,7 +24,7 @@ reqs = [
     'scikit-bio',
     'hdmf',
 ]
-
+    
 class DownloadModels(Command):
     """Custom build command."""
 
@@ -89,7 +89,7 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    'scripts': ['bin/gtnet-predict',],
+    'scripts': ['bin/gtnet',],
     'keywords': 'python '
                 'microbiome '
                 'microbial-taxonomy '

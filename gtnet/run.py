@@ -2,14 +2,15 @@ from .model import load_model
 from .sequence import _get_DNA_map, get_sequences, get_bidir_seq
 import numpy as np
 import logging
+import argparse
 
 
-def predict(fasta_path, domain, vocab, **kwargs):
+def get_predictions(fasta_path, domain, vocab, **kwargs):
     if fasta_path is None:
         logging.error('Please provide a fasta path!')
         exit()
 
-    model = load_model(domain)
+    model = load_model(domain=domain)
     input_name = model.get_inputs()[0].name
     chars, basemap, rcmap = _get_DNA_map()
 
@@ -19,3 +20,24 @@ def predict(fasta_path, domain, vocab, **kwargs):
                                   pad_value=8)
         # 2. pass chunks into model
         output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
+
+
+def predict(argv=None):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.basicConfig(format='%(levelname)s-%(message)s')
+    logging.info('starting')
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--fasta_path', type=str,
+                        default=None, help='sequence path')
+    parser.add_argument('-d', '--domain', type=str,
+                        default='archaea', help='domain',
+                        choices=['bacteria', 'archaea'])
+    parser.add_argument('-v', '--vocab', type=str,
+                        default=None, help='vocabulary')
+    args = parser.parse_args(argv)
+
+    get_predictions(fasta_path=args.fasta_path, domain=args.domain,
+                    vocab=args.vocab)
+
+    logging.info('finished!')

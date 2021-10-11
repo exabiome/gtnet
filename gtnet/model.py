@@ -1,6 +1,7 @@
 import os
 from pkg_resources import resource_filename
 import onnxruntime as rt
+import requests
 
 
 def _get_model_path(domain):
@@ -18,16 +19,31 @@ def _get_model_path(domain):
         The absolute path to the ONNX model file
     """
     if domain == 'bacteria':
-        path = "bac120_r202.resnet50.genus.onnx"
+        raise ValueError("Model not available for bacteria yet")
     elif domain == 'archaea':
-        raise ValueError("Model not available for archaea yet")
+        path = "ar122.onnx"
     else:
         raise ValueError("Unrecognized domain: '%s'" % domain)
     return os.path.join(resource_filename(__name__, 'models'), path)
 
 
-def load_model(model_path=None, domain='bacteria'):
+def load_model(model_path=None, domain='archea'):
     if model_path is None:
-        model_path = _get_model_path(domain)
+        model_path = _get_model_path(domain=domain)
     model = rt.InferenceSession(model_path)
     return model
+
+
+def download_models(argv=None):
+    required = [
+        {'path': 'gtnet/models/ar122.onnx',
+         'url': 'https://osf.io/yu738/download'}
+    ]
+    for d in required:
+        if not os.path.exists(d['path']):
+            print(f'Downloading {d["path"]} from {d["url"]}')
+            r = requests.get(d['url'], allow_redirects=True)
+            with open(d['path'], 'wb') as f:
+                f.write(r.content)
+        else:
+            print(f'{d["path"]} already exists, skipping download')
