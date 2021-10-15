@@ -28,7 +28,7 @@ reqs = [
 
 
 setup_args = {
-    'cmdclass': {'get_models': DownloadModels},
+    #'cmdclass': {'get_models': DownloadModels},
     # 'version': get_git_revision_short_hash(),
     'name': 'gtnet',
     'description': 'A package for running Genome Taxonomy Network predictions',
@@ -56,7 +56,7 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    'scripts': ['bin/gtnet',],
+    #'scripts': ['bin/gtnet',],
     'keywords': 'python '
                 'microbiome '
                 'microbial-taxonomy '
@@ -67,9 +67,9 @@ setup_args = {
                 'open-science '
                 'reproducible-research ',
     'zip_safe': False,
-#    entry_points={
-#        'console_scripts': ['my-command=exampleproject.example:main']
-#    },
+    'entry_points':{
+        'console_scripts': ['gtnet=gtnet:get_predictions']
+    },
 }
 
 
