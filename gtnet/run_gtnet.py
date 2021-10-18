@@ -27,6 +27,7 @@ def print_help():
     for c, f in command_dict.items():
         nspaces = 16 - len(c)
         print(f'    {c}' + ' '*nspaces + f.doc)
+    print('    help           print this usage statememt')
     print()
 
 
