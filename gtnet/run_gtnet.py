@@ -32,7 +32,7 @@ def print_help():
 
 
 def gtnet_run():
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1 or sys.argv[1] in ('help', '-h', '--help'):
         print_help()
     else:
         cmd = sys.argv[1]
