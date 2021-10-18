@@ -1,9 +1,8 @@
 from .model import load_model
 from .sequence import _get_DNA_map, get_sequences, get_bidir_seq
-from .utils import get_species_pred, get_label_file
+from .utils import get_species_pred, get_label_file, get_logger
 import numpy as np
 import pandas as pd
-import logging
 import argparse
 
 
@@ -39,10 +38,9 @@ def get_predictions(fasta_path, domain, vocab, output_dest, **kwargs):
                                                          
 
 def predict(argv=None):
-    logging.getLogger().setLevel(logging.INFO)
-    logging.basicConfig(format='%(levelname)s-%(message)s')
-    logging.info('starting')
-
+    logger = get_logger()
+    logger.info('starting')
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--fasta_path', type=str,
                         default=None, help='sequence path')
@@ -57,5 +55,5 @@ def predict(argv=None):
 
     get_predictions(fasta_path=args.fasta_path, domain=args.domain,
                     vocab=args.vocab, output_dest=args.output)
-
-    logging.info('finished!')
+    
+    logger.info('finished')

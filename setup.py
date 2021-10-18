@@ -68,7 +68,9 @@ setup_args = {
                 'reproducible-research ',
     'zip_safe': False,
     'entry_points':{
-        'console_scripts': ['gtnet=gtnet:get_predictions']
+        'console_scripts': [
+            'gtnet = gtnet.run_gtnet:gtnet_run'
+        ]
     },
 }
 

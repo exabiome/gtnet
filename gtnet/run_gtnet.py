@@ -30,7 +30,7 @@ def print_help():
     print()
 
 
-if __name__ == '__main__':
+def gtnet_run():
     if len(sys.argv) == 1:
         print_help()
     else:
