@@ -4,6 +4,7 @@ from .utils import get_species_pred, get_label_file, get_logger
 import numpy as np
 import pandas as pd
 import argparse
+import sys
 
 
 def get_predictions(fasta_path, domain, vocab, output_dest=None, **kwargs):
