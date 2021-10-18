@@ -18,15 +18,15 @@ def _get_model_path(domain):
         The absolute path to the ONNX model file
     """
     if domain == 'bacteria':
-        path = "bac120_r202.resnet50.genus.onnx"
+        raise ValueError("Model not available for bacteria yet")
     elif domain == 'archaea':
-        raise ValueError("Model not available for archaea yet")
+        path = 'ar122.onnx'
     else:
         raise ValueError("Unrecognized domain: '%s'" % domain)
     return os.path.join(resource_filename(__name__, 'models'), path)
 
 
-def load_model(model_path=None, domain='bacteria'):
+def load_model(model_path=None, domain='archaea'):
     if model_path is None:
         model_path = _get_model_path(domain)
     model = rt.InferenceSession(model_path)
