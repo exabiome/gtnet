@@ -33,7 +33,7 @@ def get_predictions(fasta_path, domain, vocab, output_dest=None, **kwargs):
 
     final_df = pd.DataFrame(preds, columns=['species'])
     if output_dest:
-        final_df.to_csv(f'{output_dest}/predictions.csv', index=False)
+        final_df.to_csv(output_dest, index=False)
     else:
         final_df.to_csv(sys.stdout, index=False)
                                                          
