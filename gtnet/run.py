@@ -6,7 +6,7 @@ import pandas as pd
 import argparse
 
 
-def get_predictions(fasta_path, domain, vocab, output_dest, **kwargs):
+def get_predictions(fasta_path, domain, vocab, output_dest=None, **kwargs):
     if fasta_path is None:
         logging.error('Please provide a fasta path!')
         exit()
