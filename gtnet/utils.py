@@ -20,7 +20,7 @@ def get_label_file(domain='archaea'):
         species_names = json.load(species_file)
     return species_names
 
-
+  
 def parse_logger(string):
     if not string:
         ret = logging.getLogger('stdout')

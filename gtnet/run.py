@@ -18,7 +18,7 @@ def get_predictions(fasta_path, domain, vocab, output_dest=None, **kwargs):
 
     species_names = get_label_file()
     preds = []
-    
+
     for seq in get_sequences(fasta_path, basemap):
         # 1. fwd sequence is turned into bidirectional seq (chunked)
         bidir_seq = get_bidir_seq(seq, rcmap, chunk_size=4096,
@@ -26,7 +26,7 @@ def get_predictions(fasta_path, domain, vocab, output_dest=None, **kwargs):
         # 2. pass chunks into model
         output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
         pred = get_species_pred(output)
-        
+
         # 3. extract species name based off model prediction
         species = species_names['species'][pred]
         preds.append(species)

@@ -27,7 +27,7 @@ def _get_model_path(domain):
     return os.path.join(resource_filename(__name__, 'models'), path)
 
 
-def load_model(model_path=None, domain='archea'):
+def load_model(model_path=None, domain='archaea'):
     if model_path is None:
         model_path = _get_model_path(domain=domain)
     model = rt.InferenceSession(model_path)
