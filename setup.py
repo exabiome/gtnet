@@ -6,7 +6,6 @@ import subprocess
 
 from setuptools import setup, find_packages, Command
 
-
 def get_git_revision_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
@@ -41,7 +40,8 @@ setup_args = {
     'install_requires': reqs,
     'packages': pkgs,
     # 'package_dir': {'': 'src'},
-    'package_data': {'gtnet': ["models/*.onnx"]},
+    'package_data': {'gtnet': ["models/*.onnx",
+                              "data/*.fna"]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
@@ -56,7 +56,7 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    #'scripts': ['bin/gtnet',],
+    #'scripts': ['bin/gtnet-predict',],
     'keywords': 'python '
                 'microbiome '
                 'microbial-taxonomy '

@@ -1,6 +1,7 @@
 from .model import load_model
 from .sequence import _get_DNA_map, get_sequences, get_bidir_seq
-from .utils import get_species_pred, get_label_file, get_logger
+from .utils import get_species_pred, get_label_file
+from .utils import get_logger, get_data_path
 import numpy as np
 import pandas as pd
 import argparse
@@ -58,3 +59,10 @@ def predict(argv=None):
                     vocab=args.vocab, output_dest=args.output)
     
     logger.info('finished')
+    
+
+def run_test(argv=None):
+    data_path = get_data_path()
+    get_predictions(fasta_path=data_path, domain='archaea',
+            vocab=None, output_dest=None)
+    
