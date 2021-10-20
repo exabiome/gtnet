@@ -1,6 +1,7 @@
 from .model import load_model
 from .sequence import _get_DNA_map, get_sequences, get_bidir_seq
-from .utils import get_species_pred, get_label_file, get_logger
+from .utils import get_species_pred, get_label_file
+from .utils import get_logger, get_data_path
 import numpy as np
 import pandas as pd
 import argparse
@@ -58,3 +59,19 @@ def predict(argv=None):
                     vocab=args.vocab, output_dest=args.output)
     
     logger.info('finished')
+    
+
+def run_test(argv=None):
+    data_path = get_data_path()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--domain', type=str,
+                        default='archaea', help='domain',
+                        choices=['bacteria', 'archaea'])
+    parser.add_argument('-v', '--vocab', type=str,
+                        default=None, help='vocabulary')
+    parser.add_argument('-o', '--output', type=str,
+                        default=None, help='output destination')
+    args = parser.parse_args(argv)
+    get_predictions(fasta_path=data_path, domain=args.domain,
+                    vocab=args.vocab, output_dest=args.output)
+    

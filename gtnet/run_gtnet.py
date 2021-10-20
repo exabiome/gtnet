@@ -18,6 +18,7 @@ command_dict = {
                                'Download models if not already available'),
     'predict': Command('run.predict',
                        'Predict taxonomy of provided sequence(s)'),
+    'run-test': Command('run.run_test', 'Run gtnet on a sample dataset provided'),
 }
 
 
@@ -27,7 +28,7 @@ def print_help():
     for c, f in command_dict.items():
         nspaces = 16 - len(c)
         print(f'    {c}' + ' '*nspaces + f.doc)
-    print('    help           print this usage statememt')
+    print('    help            print this usage statememt')
     print()
 
 
