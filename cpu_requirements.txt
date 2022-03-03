@@ -1,0 +1,1 @@
+onnxruntime=1.6 #1.8 requires CUDA 11.0.3
