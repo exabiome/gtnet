@@ -17,13 +17,7 @@ with open('README.md', 'r') as fp:
 
 pkgs = find_packages('src', exclude=['data'])
 
-reqs = [
-    #'scipy',
-    #'scikit-learn',
-    #'numpy',
-    #'scikit-bio',
-    #'hdmf',
-]
+#reqs = []
 
 
 setup_args = {
