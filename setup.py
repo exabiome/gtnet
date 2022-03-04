@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-import requests
 import subprocess
 
 from setuptools import setup, find_packages, Command
@@ -17,18 +16,8 @@ with open('README.md', 'r') as fp:
 
 pkgs = find_packages('src', exclude=['data'])
 
-reqs = [
-    'numpy',
-    'scipy',
-    'scikit-learn',
-    'scikit-bio',
-    'hdmf',
-]
-
 
 setup_args = {
-    #'cmdclass': {'get_models': DownloadModels},
-    # 'version': get_git_revision_short_hash(),
     'name': 'gtnet',
     'description': 'A package for running Genome Taxonomy Network predictions',
     'long_description': readme,
@@ -39,7 +28,6 @@ setup_args = {
     'license': "BSD",
     'install_requires': reqs,
     'packages': pkgs,
-    # 'package_dir': {'': 'src'},
     'package_data': {'gtnet': ["models/*.onnx",
                               "data/*.fna"]},
     'classifiers': [
@@ -56,7 +44,6 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    #'scripts': ['bin/gtnet-predict',],
     'keywords': 'python '
                 'microbiome '
                 'microbial-taxonomy '
