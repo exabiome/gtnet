@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-import requests
+#import requests
 import subprocess
 
 from setuptools import setup, find_packages, Command
@@ -18,11 +18,11 @@ with open('README.md', 'r') as fp:
 pkgs = find_packages('src', exclude=['data'])
 
 reqs = [
-    'numpy',
-    'scipy',
-    'scikit-learn',
-    'scikit-bio',
-    'hdmf',
+    #'scipy',
+    #'scikit-learn',
+    #'numpy',
+    #'scikit-bio',
+    #'hdmf',
 ]
 
 
