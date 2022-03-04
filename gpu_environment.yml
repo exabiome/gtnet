@@ -102,4 +102,3 @@ dependencies:
     - six==1.16.0
     - threadpoolctl==3.1.0
     - zipp==3.7.0
-prefix: /global/homes/a/azaidi/.conda/envs/test_gtnet
