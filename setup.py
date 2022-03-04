@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-#import requests
 import subprocess
 
 from setuptools import setup, find_packages, Command
@@ -16,8 +15,6 @@ with open('README.md', 'r') as fp:
     readme = fp.read()
 
 pkgs = find_packages('src', exclude=['data'])
-
-#reqs = []
 
 
 setup_args = {

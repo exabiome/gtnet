@@ -1,4 +1,3 @@
-name: cpu_gtnet_clean
 channels:
   - defaults
 dependencies:
