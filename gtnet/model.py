@@ -32,18 +32,3 @@ def load_model(model_path=None, domain='archaea'):
         model_path = _get_model_path(domain=domain)
     model = rt.InferenceSession(model_path)
     return model
-
-
-def download_models(argv=None):
-    required = [
-        {'path': 'gtnet/models/ar122.onnx',
-         'url': 'https://osf.io/yu738/download'}
-    ]
-    for d in required:
-        if not os.path.exists(d['path']):
-            print(f'Downloading {d["path"]} from {d["url"]}')
-            r = requests.get(d['url'], allow_redirects=True)
-            with open(d['path'], 'wb') as f:
-                f.write(r.content)
-        else:
-            print(f'{d["path"]} already exists, skipping download')
