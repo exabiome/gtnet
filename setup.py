@@ -14,8 +14,11 @@ def get_git_revision_short_hash():
 with open('README.md', 'r') as fp:
     readme = fp.read()
 
-pkgs = find_packages('src', exclude=['data'])
-
+reqs = ['numpy',
+        'onnxruntime',
+        'pandas',
+        'ruamel_yaml',
+        'scikit-bio']
 
 setup_args = {
     'name': 'gtnet',
@@ -27,8 +30,8 @@ setup_args = {
     'url': 'https://github.com/exabiome/gtnet',
     'license': "BSD",
     'install_requires': reqs,
-    'packages': pkgs,
-    'package_data': {'gtnet': ["models/*.onnx",
+    'packages': ['gtnet'],
+    'package_data': {'gtnet': ["models/*",
                               "data/*.fna"]},
     'classifiers': [
         "Programming Language :: Python",
