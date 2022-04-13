@@ -39,4 +39,19 @@ class DNA_map_encoder:
         return cls.basemap[charar]
 
 
-#def function_for_windowing():
+def batch_sequence(sequence, window, padval, step):
+    '''
+    (0) encode sequence
+    (1) determine start + end points
+    (2) create empty batches matrix of appropriate size
+    *initialize with pad value*
+    (3) populate matrix with encoded sequence information
+    '''
+    enc = DNA_map_encoder.encode(sequence)
+    starts = np.arange(0, enc.shape[0], step)
+    ends = np.minimum(starts + window, enc.shape[0])
+    batches = np.ones((len(starts), window), dtype=int) * padval
+    for idx, (start_idx, end_idx) in enumerate(zip(starts, ends)):
+        length = end_idx - start_idx
+        batches[idx][:length] = enc[start_idx:end_idx]
+    return batches
