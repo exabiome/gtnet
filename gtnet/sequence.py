@@ -1,9 +1,5 @@
 import numpy as np
 
-__all__ = [
-           '_get_DNA_map',
-           'DNA_map_encoder'
-          ]
 
 def _get_DNA_map():
     '''
