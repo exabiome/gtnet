@@ -1,3 +1,4 @@
+name: gtnet
 channels:
   - defaults
 dependencies:

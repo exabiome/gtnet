@@ -19,6 +19,7 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
         exit()
 
     model = load_model()
+
     input_name = model.get_inputs()[0].name
     chars, basemap = _get_DNA_map()
 
@@ -35,7 +36,8 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
     taxon_table = get_label_file()
     preds = []
 
-    for sequence in skbio.read(fasta_path, format='fasta', constructor=DNA, validate=False):
+    for sequence in skbio.read(fasta_path, format='fasta', constructor=DNA, 
+                                                            validate=False):
         # 1. Turn full sequence into windowed batches
         batches = batch_sequence(sequence, window=config['window'], 
                                 padval=pad_value, step=config['step'])
