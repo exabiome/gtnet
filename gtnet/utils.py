@@ -5,7 +5,7 @@ import logging
 import sys
 
 
-def get_species_pred(output):
+def get_taxon_pred(output):
     pass
 
 

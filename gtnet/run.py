@@ -1,6 +1,6 @@
 from .model import load_model
-from .sequence import _get_DNA_map, get_sequences, get_bidir_seq
-from .utils import get_species_pred, get_label_file
+from .sequence import _get_DNA_map, batch_sequence
+from .utils import get_taxon_pred, get_label_file
 from .utils import get_logger, get_data_path
 import numpy as np
 import pandas as pd
@@ -8,7 +8,7 @@ import argparse
 import sys
 
 
-def get_predictions(fasta_path, domain, vocab, output_dest=None, **kwargs):
+def get_predictions(fasta_path, output_dest=None, **kwargs):
     if fasta_path is None:
         logging.error('The path provided is not a fasta file')
         exit()
@@ -52,10 +52,11 @@ def predict(argv=None):
     args = parser.parse_args(argv)
 
     if(args.txt_file):
-        fasta_paths = #read in fasta paths
+        #pass
+        fasta_paths = args.txt_file#read in fasta paths
     else: fasta_paths = [args.fasta_path,]
     for fasta_path in fasta_paths:
-        get_predictions(fasta_path=fasta_path, vocab=args.vocab, 
+        get_predictions(fasta_path=fasta_path, 
                         output_dest=args.output)
     
     logger.info('finished')
@@ -68,7 +69,10 @@ def run_test(argv=None):
     parser.add_argument('-o', '--output', type=str,
                         default=None, help='output destination')
 
+    chars, _ = _get_DNA_map()
+
     args = parser.parse_args(argv)
-    get_predictions(fasta_path=data_path, vocab=args.vocab, 
+    get_predictions(fasta_path=data_path,  
+                    vocab=chars, 
                     output_dest=args.output)
     
