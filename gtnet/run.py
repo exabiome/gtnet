@@ -2,10 +2,16 @@ from .model import load_model
 from .sequence import _get_DNA_map, batch_sequence
 from .utils import get_taxon_pred, get_label_file
 from .utils import get_logger, get_data_path
+import ruamel.yaml as yaml
 import numpy as np
 import pandas as pd
 import argparse
+import skbio
+from skbio.sequence import DNA
+import json
 import sys
+import pdb
+import os
 
 
 def get_predictions(fasta_path, output_dest=None, **kwargs):
@@ -15,20 +21,31 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
 
     model = load_model()
     input_name = model.get_inputs()[0].name
-    chars, basemap, rcmap = _get_DNA_map()
+    chars, basemap = _get_DNA_map()
+
+    deploy_path = 'gtnet/gtnet.deploy' #not ideal
+    config_path = os.path.join(deploy_path, 'config.yml')
+    with open(os.path.join(deploy_path, 'manifest.json'), 'r') as f:
+        manifest = json.load(f)
+
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    pad_value = chars.find('N')
 
     taxon_table = get_label_file()
     preds = []
 
     for sequence in skbio.read(fasta_path, format='fasta', constructor=DNA, validate=False):
         # 1. Turn full sequence into windowed batches
-        batches = batch_sequence(sequence, window, padval, step)
+        batches = batch_sequence(sequence, window=config['window'], 
+                                padval=pad_value, step=config['step'])
         # 2. pass chunks into model
         output = model.run(None, {input_name: batches.astype(np.int64)})[0]
-        species_pred = get_species_pred(output)
+        pred_idx = get_taxon_pred(output)
 
         # 3. extract predicted row from taxon_table
-        taxon_pred = taxon_table[taxon_table.species == species_pred]
+        taxon_pred = taxon_table.iloc[pred_idx]
         preds.append(taxon_pred)
 
     final_df = pd.DataFrame(preds, columns=taxon_table.columns)

@@ -1,12 +1,14 @@
-import os
 from pkg_resources import resource_filename
+import pandas as pd
 import json
 import logging
 import sys
+import os
+
 
 
 def get_taxon_pred(output):
-    pass
+    return output.mean(axis=0).argmax()
 
 
 def get_label_file():
