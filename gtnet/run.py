@@ -10,7 +10,6 @@ import skbio
 from skbio.sequence import DNA
 import json
 import sys
-import pdb
 import os
 
 
@@ -40,6 +39,7 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
         # 1. Turn full sequence into windowed batches
         batches = batch_sequence(sequence, window=config['window'], 
                                 padval=pad_value, step=config['step'])
+        batches = batches[:10]
         # 2. pass chunks into model
         output = model.run(None, {input_name: batches.astype(np.int64)})[0]
         pred_idx = get_taxon_pred(output)
@@ -69,8 +69,8 @@ def predict(argv=None):
     args = parser.parse_args(argv)
 
     if(args.txt_file):
-        #pass
-        fasta_paths = args.txt_file#read in fasta paths
+        with open(args.txt_file, 'r') as f:
+            fasta_paths = [path.strip() for path in f]
     else: fasta_paths = [args.fasta_path,]
     for fasta_path in fasta_paths:
         get_predictions(fasta_path=fasta_path, 
