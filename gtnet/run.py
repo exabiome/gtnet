@@ -1,7 +1,7 @@
-from .model import load_model
 from .sequence import _get_DNA_map, batch_sequence
 from .utils import get_taxon_pred, get_label_file
-from .utils import get_logger, get_data_path
+from .utils import get_logger, get_data_path, get_config
+import onnxruntime as rt
 import ruamel.yaml as yaml
 import numpy as np
 import pandas as pd
@@ -18,30 +18,21 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
         logging.error('The path provided is not a fasta file')
         exit()
 
-    model = load_model()
-
-    input_name = model.get_inputs()[0].name
-    chars, basemap = _get_DNA_map()
-
-    deploy_path = 'gtnet/gtnet.deploy' #not ideal
-    config_path = os.path.join(deploy_path, 'config.yml')
-    with open(os.path.join(deploy_path, 'manifest.json'), 'r') as f:
-        manifest = json.load(f)
-
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
-
-    pad_value = chars.find('N')
-
+    config = get_config()
     taxon_table = get_label_file()
     preds = []
+    model = rt.InferenceSession(config.inf_model_path)
+    input_name = model.get_inputs()[0].name
 
-    for sequence in skbio.read(fasta_path, format='fasta', constructor=DNA, 
-                                                            validate=False):
+    for sequence in skbio.read(fasta_path, format='fasta', 
+                               constructor=DNA, validate=False):
         # 1. Turn full sequence into windowed batches
-        batches = batch_sequence(sequence, window=config['window'], 
-                                padval=pad_value, step=config['step'])
-        batches = batches[:10]
+        batches = batch_sequence(sequence=sequence,
+                                chars=config.chars, 
+                                window=config.window, 
+                                padval=config.pad_value, 
+                                step=config.step)
+        
         # 2. pass chunks into model
         output = model.run(None, {input_name: batches.astype(np.int64)})[0]
         pred_idx = get_taxon_pred(output)
@@ -88,10 +79,7 @@ def run_test(argv=None):
     parser.add_argument('-o', '--output', type=str,
                         default=None, help='output destination')
 
-    chars, _ = _get_DNA_map()
-
     args = parser.parse_args(argv)
-    get_predictions(fasta_path=data_path,  
-                    vocab=chars, 
+    get_predictions(fasta_path=data_path,   
                     output_dest=args.output)
     

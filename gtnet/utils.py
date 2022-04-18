@@ -1,10 +1,38 @@
 from pkg_resources import resource_filename
+from .sequence import _get_DNA_map
 import pandas as pd
+import ruamel.yaml as yaml
 import json
 import logging
 import sys
 import os
 
+
+class gtnet_config:
+    def __init__(self, manifest, model_config):
+        self.manifest = manifest
+        self.model_config = model_config
+        self.chars = ''.join(self.manifest['vocabulary'])
+        self.pad_value = self.chars.find('N')
+        self.basemap = _get_DNA_map(self.chars)
+        self.window = self.model_config['window']
+        self.step = self.model_config['step']
+        self.inf_model_path = self._get_model_path(self.manifest['nn_model'])
+        self.conf_model_path = self._get_model_path(self.manifest['conf_model']) 
+    def _get_model_path(self, model_path):
+        return resource_filename(__name__, model_path)
+
+
+def get_config():
+    deploy_path = os.path.join(resource_filename(__name__, 'gtnet.deploy/'))
+    config_path = os.path.join(deploy_path, 'config.yml')
+    manifest_path = os.path.join(deploy_path, 'manifest.json')
+    with open(config_path, 'r') as  f:
+        model_config = yaml.safe_load(f)
+    with open(manifest_path, 'r') as f:
+        manifest = json.load(f)
+    config = gtnet_config(manifest, model_config)
+    return config
 
 
 def get_taxon_pred(output):
