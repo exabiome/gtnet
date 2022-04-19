@@ -1,6 +1,6 @@
-from .sequence import _get_DNA_map, batch_sequence
-from .utils import get_taxon_pred, get_label_file
-from .utils import get_logger, get_data_path, get_config
+from .sequence import _get_DNA_map, batch_sequence, DNAEncoder
+from .utils import get_taxon_pred, get_config
+from .utils import get_logger, get_data_path
 import onnxruntime as rt
 import ruamel.yaml as yaml
 import numpy as np
@@ -24,15 +24,17 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
 
     model =  rt.InferenceSession(config.inf_model_path)
     input_name = model.get_inputs()[0].name
+    encoder = DNAEncoder(config.chars)
 
     for sequence in skbio.read(fasta_path, format='fasta', 
                                constructor=DNA, validate=False):
         # 1. Turn full sequence into windowed batches
         batches = batch_sequence(sequence=sequence,
-                                chars=config.chars, 
                                 window=config.window, 
                                 padval=config.pad_value, 
-                                step=config.step)
+                                step=config.step,
+                                encoder=encoder)
+        batches = batches[:10]
         # 2. pass chunks into model
         output = model.run(None, {input_name: batches.astype(np.int64)})[0]
         pred_idx = get_taxon_pred(output)

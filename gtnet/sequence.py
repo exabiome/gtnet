@@ -18,7 +18,7 @@ def _get_DNA_map(chars):
     return basemap
 
 
-class DNA_encoder:
+class DNAEncoder:
     '''
     encodes sequences
     '''
@@ -31,7 +31,7 @@ class DNA_encoder:
         return self.basemap[charar]
 
 
-def batch_sequence(sequence, window, padval, step, chars):
+def batch_sequence(sequence, window, padval, step, encoder):
     '''
     (0) encode sequence
     (1) determine start + end points
@@ -39,7 +39,6 @@ def batch_sequence(sequence, window, padval, step, chars):
     *initialize with pad value*
     (3) populate matrix with encoded sequence information
     '''
-    encoder = DNA_encoder(chars)
     encoded_seq = encoder.encode(sequence)
     starts = np.arange(0, encoded_seq.shape[0], step)
     ends = np.minimum(starts + window, encoded_seq.shape[0])
