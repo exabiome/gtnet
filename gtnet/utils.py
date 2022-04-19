@@ -8,42 +8,49 @@ import sys
 import os
 
 
-class gtnet_config:
-    def __init__(self, manifest, model_config):
+class GTNetConfig:
+    '''
+    class that aggregates information from:
+        (1) Deployment package manifest
+            + determines/stores absolute paths
+        (2) Model configuration
+    '''
+    def __init__(self, manifest):
         self.manifest = manifest
-        self.model_config = model_config
+        self.inf_model_path = self._get_abs_path(self.manifest['nn_model'])
+        self.conf_model_path = self._get_abs_path(self.manifest['conf_model']) 
+        self.model_config = self._get_model_config()
+        self.window = self.model_config['window']
+        self.step = self.model_config['step']
+        self.taxa_df_path = self._get_abs_path(self.manifest['taxa_table'])
         self.chars = ''.join(self.manifest['vocabulary'])
         self.pad_value = self.chars.find('N')
         self.basemap = _get_DNA_map(self.chars)
-        self.window = self.model_config['window']
-        self.step = self.model_config['step']
-        self.inf_model_path = self._get_model_path(self.manifest['nn_model'])
-        self.conf_model_path = self._get_model_path(self.manifest['conf_model']) 
-    def _get_model_path(self, model_path):
-        return resource_filename(__name__, model_path)
+        
+    def _get_abs_path(self, relative_path):
+        return resource_filename(__name__, relative_path)
+
+    def _get_model_config(self):
+        config_path = self._get_abs_path(self.manifest['training_config'])
+        with open(config_path, 'r') as f:
+            model_config = yaml.safe_load(f)
+        return model_config
 
 
 def get_config():
+    '''
+    Extract manifest file and use that to instantiate our config class
+    '''
     deploy_path = os.path.join(resource_filename(__name__, 'gtnet.deploy/'))
-    config_path = os.path.join(deploy_path, 'config.yml')
     manifest_path = os.path.join(deploy_path, 'manifest.json')
-    with open(config_path, 'r') as  f:
-        model_config = yaml.safe_load(f)
     with open(manifest_path, 'r') as f:
         manifest = json.load(f)
-    config = gtnet_config(manifest, model_config)
+    config = GTNetConfig(manifest)
     return config
 
 
 def get_taxon_pred(output):
     return output.mean(axis=0).argmax()
-
-
-def get_label_file():
-    name_path = os.path.join(resource_filename(__name__, 'gtnet.deploy/taxa_table.csv'))
-    with open(name_path) as taxon_file:
-         taxon_df = pd.read_csv(taxon_file) 
-    return taxon_df
 
   
 def parse_logger(string):

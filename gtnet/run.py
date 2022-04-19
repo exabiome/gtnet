@@ -19,9 +19,10 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
         exit()
 
     config = get_config()
-    taxon_table = get_label_file()
+    taxon_table = pd.read_csv(config.taxa_df_path)
     preds = []
-    model = rt.InferenceSession(config.inf_model_path)
+
+    model =  rt.InferenceSession(config.inf_model_path)
     input_name = model.get_inputs()[0].name
 
     for sequence in skbio.read(fasta_path, format='fasta', 
@@ -32,7 +33,6 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
                                 window=config.window, 
                                 padval=config.pad_value, 
                                 step=config.step)
-        
         # 2. pass chunks into model
         output = model.run(None, {input_name: batches.astype(np.int64)})[0]
         pred_idx = get_taxon_pred(output)
