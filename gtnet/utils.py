@@ -10,10 +10,44 @@ import os
 
 class GTNetConfig:
     '''
-    class that aggregates information from:
-        (1) Deployment package manifest
-            + determines/stores absolute paths
-        (2) Model configuration
+    A class that aggregates information from:
+        (1) Deployment package manifest - package information for 
+        inference, including model and label paths. Also stores
+        name of configuration file and character vocab used to train 
+        (2) Model configuration - the parameters used in training NN
+
+    Parameters
+    ----------
+    manifest : dict
+        package deployment information (i.e. model path etc)
+    
+    inf_model_path : str
+        absolute path of NN model
+
+    conf_model_path : str
+        absolute path of confidence model
+
+    model_config : dict
+        config parameters used for trained model
+
+    window : int
+        window size used to chunk and batch sequence
+
+    step : int
+        step size used to chunk and batch sequence
+
+    taxa_df_path : str
+        absolute path of label file
+
+    chars : str
+        character vocabular used by trained model
+
+    pad_value : int
+        value to use when padding sequence
+
+    basemap : numpy.ndarray
+        DNA map used for encoding of sequence
+
     '''
     def __init__(self, manifest):
         self.manifest = manifest
@@ -26,7 +60,7 @@ class GTNetConfig:
         self.chars = ''.join(self.manifest['vocabulary'])
         self.pad_value = self.chars.find('N')
         self.basemap = _get_DNA_map(self.chars)
-        
+    
     def _get_abs_path(self, relative_path):
         return resource_filename(__name__, relative_path)
 
@@ -39,7 +73,12 @@ class GTNetConfig:
 
 def get_config():
     '''
-    Extract manifest file and use that to instantiate our config class
+    Extract manifest file and use that to instantiate a config object
+    
+    Returns
+    -------
+    config : GTNetConfig object
+        the config object for running GTNet
     '''
     deploy_path = os.path.join(resource_filename(__name__, 'gtnet.deploy/'))
     manifest_path = os.path.join(deploy_path, 'manifest.json')
@@ -50,7 +89,21 @@ def get_config():
 
 
 def get_taxon_pred(output):
-    return output.mean(axis=0).argmax()
+    '''
+    Takes our model output to determine the most confident prediction
+
+    Parameters
+    ----------
+    output : numpy.ndarray
+        predicted output of model for one sequence
+
+    Returns
+    -------
+    prediction : numpy.int64
+        most confident prediction -- based on highest mean value
+    '''
+    prediction = output.mean(axis=0).argmax()
+    return prediction
 
   
 def parse_logger(string):

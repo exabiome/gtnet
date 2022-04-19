@@ -14,6 +14,25 @@ import os
 
 
 def get_predictions(fasta_path, output_dest=None, **kwargs):
+    '''
+    Extracts associated configuration file for model to
+    instantiate model, label file and encoder
+    
+    Takes a Fasta file and with each sequence in the file it
+    will break them into batches, run inference on that sequence
+    and determine the best prediction. 
+
+    Records all predictions into a single dataframe that is 
+    pushed to stdout if an 'output_dest' is not provided
+    
+    Parameters
+    ----------
+    fasta_path : str
+        Path of single fasta file 
+
+    output_dest : str, default=None
+        Path where final predictions will be deposited
+    '''
     if fasta_path is None:
         logging.error('The path provided is not a fasta file')
         exit()

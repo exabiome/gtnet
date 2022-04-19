@@ -12,7 +12,7 @@ def _get_DNA_map(chars):
     '''
     basemap = np.zeros(128, dtype=np.uint8)
     for i, c in reversed(list(enumerate(chars))):  # reverse so we store the lowest for self-complementary codes
-        basemap[ord(c)] = i
+        basemap[ord(c.upper())] = i
         basemap[ord(c.lower())] = i
     basemap[ord('x')] = basemap[ord('X')] = basemap[ord('n')]
     return basemap
@@ -20,24 +20,69 @@ def _get_DNA_map(chars):
 
 class DNAEncoder:
     '''
-    encodes sequences
+    Creates an Encoder with the provided character sequence
+    
+    Converts all (string) characters of DNA to integers
+    based on where the character is in our chars array
+    
+    For example, with 'chars = "ATCG"', 'A' would map
+    to '0' and 'T' would map to '2' and so forth
+    
+    Parameters
+    ----------
+    chars : str
+        A string with the DNA characters to encode.
+        The position of the base in the string will
+        be the integer it gets encoded to
+
     '''
     def __init__(self, chars):
         self.chars = chars
         self.basemap = _get_DNA_map(self.chars)
 
     def encode(self, seq):
+        '''
+        Encode string characters into associated integers
+
+        Parameters
+        ----------
+        seq : skbio.sequence._dna.DNA
+            Our (string) character sequence read from file
+
+        Returns
+        -------
+        encoded_sequence : numpy.ndarray
+            Encoded sequence from associated basemap
+
+        '''
         charar = seq.values.view(np.uint8)
-        return self.basemap[charar]
+        encoded_sequence = self.basemap[charar] 
+        return encoded_sequence
 
 
 def batch_sequence(sequence, window, padval, step, encoder):
     '''
-    (0) encode sequence
-    (1) determine start + end points
-    (2) create empty batches matrix of appropriate size
-    *initialize with pad value*
-    (3) populate matrix with encoded sequence information
+    Takes a DNA sequence of string characters returns an
+    array with the sequence encoded into integers and batched
+    in the same manner as the model was trained on
+    
+    Parameters
+    ----------
+    sequence : skbio.sequence._dna.DNA
+        The character DNA sequence, read from file 
+    window : int
+        The window size used for batching our sequence
+    padval : int
+        Which value should be used for padding
+    step : int
+        Step size used for batching our sequence
+    encoder : DNAEncoder
+        An instantiation of our DNAEncoder class
+
+    Returns
+    -------
+    batches : numpy.ndarray
+        original sequence broken down into batches
     '''
     encoded_seq = encoder.encode(sequence)
     starts = np.arange(0, encoded_seq.shape[0], step)
