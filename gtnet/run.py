@@ -22,8 +22,8 @@ def get_predictions(fasta_path, output_dest=None, **kwargs):
     will break them into batches, run inference on that sequence
     and determine the best prediction. 
 
-    Records all predictions into a single dataframe that is 
-    pushed to stdout if an 'output_dest' is not provided
+    Records all predictions into a single DataFrame that is 
+    written to `output_dest` or standard output if `output_dest` is not provided
     
     Parameters
     ----------

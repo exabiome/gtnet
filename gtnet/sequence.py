@@ -25,8 +25,8 @@ class DNAEncoder:
     Converts all (string) characters of DNA to integers
     based on where the character is in our chars array
     
-    For example, with 'chars = "ATCG"', 'A' would map
-    to '0' and 'T' would map to '2' and so forth
+    For example, with `chars = "ATCG"`, `A` would map
+    to `0` and `T` would map to `2` and so forth
     
     Parameters
     ----------
@@ -47,7 +47,7 @@ class DNAEncoder:
         Parameters
         ----------
         seq : skbio.sequence._dna.DNA
-            Our (string) character sequence read from file
+            A scikit-bio *DNA* object
 
         Returns
         -------

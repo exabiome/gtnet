@@ -14,9 +14,9 @@ class GTNetConfig:
         (1) Deployment package manifest - package information for 
         inference, including model and label paths. Also stores
         name of configuration file and character vocab used to train 
-        (2) Model configuration - the parameters used in training NN
+        (2) Model configuration - the parameters used for training
 
-    Parameters
+    Attributes
     ----------
     manifest : dict
         package deployment information (i.e. model path etc)
@@ -100,7 +100,7 @@ def get_taxon_pred(output):
     Returns
     -------
     prediction : numpy.int64
-        most confident prediction -- based on highest mean value
+        most confident prediction -- based on highest mean network output value
     '''
     prediction = output.mean(axis=0).argmax()
     return prediction
