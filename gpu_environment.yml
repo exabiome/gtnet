@@ -1,3 +1,4 @@
+name: gtnet-gpu
 channels:
   - conda-forge
   - anaconda

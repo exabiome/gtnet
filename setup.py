@@ -17,7 +17,7 @@ with open('README.md', 'r') as fp:
 reqs = ['numpy',
         'onnxruntime',
         'pandas',
-        'ruamel_yaml',
+        'ruamel.yaml',
         'scikit-bio']
 
 setup_args = {

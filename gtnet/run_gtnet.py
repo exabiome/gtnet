@@ -14,8 +14,6 @@ class Command:
 
 
 command_dict = {
-    'download-models': Command('model.download_models',
-                               'Download models if not already available'),
     'predict': Command('run.predict',
                        'Predict taxonomy of provided sequence(s)'),
     'run-test': Command('run.run_test', 'Run gtnet on a sample dataset provided'),
