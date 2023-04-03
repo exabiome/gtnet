@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-
-from setuptools import setup, find_packages
+import os
 import re
 import subprocess
+
+from setuptools import setup, find_packages, Command
 
 def get_git_revision_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
@@ -13,25 +14,13 @@ def get_git_revision_short_hash():
 with open('README.md', 'r') as fp:
     readme = fp.read()
 
-pkgs = find_packages('src', exclude=['data'])
-print('found these packages:', pkgs)
-
-# reqs_re = re.compile("[<=>]+")
-# with open('requirements.txt', 'r') as fp:
-#     reqs = [reqs_re.split(x.strip())[0] for x in fp.readlines()]
-
-reqs = [
-    'numpy',
-    'scipy',
-    'scikit-learn',
-    #'scikit-bio',
-    'hdmf',
-]
-
-print(reqs)
+reqs = ['numpy',
+        'onnxruntime',
+        'pandas',
+        'ruamel.yaml',
+        'scikit-bio']
 
 setup_args = {
-    'version': get_git_revision_short_hash(),
     'name': 'gtnet',
     'description': 'A package for running Genome Taxonomy Network predictions',
     'long_description': readme,
@@ -41,9 +30,9 @@ setup_args = {
     'url': 'https://github.com/exabiome/gtnet',
     'license': "BSD",
     'install_requires': reqs,
-    'packages': pkgs,
-    # 'package_dir': {'': 'src'},
-    'package_data': {'gtnet': ["data/*.onnx"]},
+    'packages': ['gtnet'],
+    'package_data': {'gtnet': ["models/*",
+                              "data/*.fna"]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
@@ -58,7 +47,6 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    'scripts': ['bin/gtnet-predict',],
     'keywords': 'python '
                 'microbiome '
                 'microbial-taxonomy '
@@ -68,8 +56,15 @@ setup_args = {
                 'open-source '
                 'open-science '
                 'reproducible-research ',
-    'zip_safe': False
+    'zip_safe': False,
+    'entry_points':{
+        'console_scripts': [
+            'gtnet = gtnet.run_gtnet:gtnet_run'
+        ]
+    },
 }
+
+
 
 if __name__ == '__main__':
     setup(**setup_args)

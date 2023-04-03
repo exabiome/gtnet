@@ -1,26 +1,66 @@
-from model import load_model
-from sequence import _get_DNA_map, get_sequences, get_bidir_seq
+from .sequence import _get_DNA_map, batch_sequence, DNAEncoder
+from .utils import get_taxon_pred, get_config
+from .utils import get_logger, get_data_path
+import onnxruntime as rt
+import ruamel.yaml as yaml
 import numpy as np
+import pandas as pd
 import argparse
-import logging
+import skbio
+from skbio.sequence import DNA
+import json
+import sys
+import os
 
 
-def predict(fasta_path, model_path, vocab, **kwargs):
+def get_predictions(fasta_path, output_dest=None, **kwargs):
+    '''
+    Extracts associated configuration file for model to
+    instantiate model, label file and encoder
+
+    Takes a Fasta file and with each sequence in the file it
+    will break them into batches, run inference on that sequence
+    and determine the best prediction.
+
+    Records all predictions into a single DataFrame that is
+    written to `output_dest` or standard output if `output_dest` is not provided
+
+    Parameters
+    ----------
+    fasta_path : str
+        Path of single fasta file
+
+    output_dest : str, default=None
+        Path where final predictions will be deposited
+    '''
     if fasta_path is None:
-        logging.error('Please provide a fasta path!')
+        logging.error('The path provided is not a fasta file')
         exit()
 
-    model = load_model(model_path)
+    config = get_config()
+    taxon_table = pd.read_csv(config.taxa_df_path)
+    preds = []
+
+    model =  rt.InferenceSession(config.inf_model_path)
     input_name = model.get_inputs()[0].name
-    chars, basemap, rcmap = _get_DNA_map()
+    encoder = DNAEncoder(config.chars)
 
-    for seq in get_sequences(fasta_path, basemap):
-        # 1. chunk sequences
-        bidir_seq = get_bidir_seq(seq, rcmap, chunk_size=4096,
-                                  pad_value=8)
+    for sequence in skbio.read(fasta_path, format='fasta',
+                               constructor=DNA, validate=False):
+        # 1. Turn full sequence into windowed batches
+        batches = batch_sequence(sequence=sequence,
+                                window=config.window,
+                                padval=config.pad_value,
+                                step=config.step,
+                                encoder=encoder)
+        batches = batches[:10]
         # 2. pass chunks into model
-        output = model.run(None, {input_name: bidir_seq.astype(np.int64)})[0]
+        output = model.run(None, {input_name: batches.astype(np.int64)})[0]
+        pred_idx = get_taxon_pred(output)
 
+        # 3. extract predicted row from taxon_table
+        taxon_pred = taxon_table.iloc[pred_idx]
+        preds.append(taxon_pred)
 
 def run_onnx_inference(argv=None):
     """
@@ -185,15 +225,32 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--fasta_path', type=str,
                         default=None, help='sequence path')
-    parser.add_argument('-m', '--model_path', type=str,
-                        default=None, help='path to onnx model')
-    parser.add_argument('-v', '--vocab', type=str,
-                        default=None, help='vocabulary')
-    args = parser.parse_args()
-    predict(fasta_path=args.fasta_path, model_path=args.model_path,
-            vocab=args.vocab)
-    logging.info('finished!')
+    parser.add_argument('-t', '--txt_file', type=str,
+                        default=None, help='txt file with fasta paths')
+    parser.add_argument('-o', '--output', type=str,
+                        default=None, help='output destination')
+    args = parser.parse_args(argv)
+
+    if args.txt_file:
+        with open(args.txt_file, 'r') as f:
+            fasta_paths = [path.strip() for path in f]
+    else:
+        fasta_paths = [args.fasta_path,]
+
+    for fasta_path in fasta_paths:
+        get_predictions(fasta_path=fasta_path, output_dest=args.output)
+
+    logger.info('finished')
 
 
-if __name__ == '__main__':
-    main()
+def run_test(argv=None):
+    data_path = get_data_path()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-o', '--output', type=str,
+                        default=None, help='output destination')
+
+    args = parser.parse_args(argv)
+    get_predictions(fasta_path=data_path,
+                    output_dest=args.output)
+
