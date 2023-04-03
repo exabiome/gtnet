@@ -2,7 +2,6 @@ import logging
 import multiprocessing as mp
 
 import numpy as np
-<<<<<<< HEAD
 import skbio
 from skbio.sequence import DNA
 
