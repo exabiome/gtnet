@@ -14,7 +14,7 @@ class Command:
 
 
 command_dict = {
-    'predict': Command('run.predict',
+    'predict': Command('run.run_onnx_inference',
                        'Predict taxonomy of provided sequence(s)'),
     'run-test': Command('run.run_test', 'Run gtnet on a sample dataset provided'),
 }

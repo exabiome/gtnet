@@ -65,7 +65,7 @@ class FastaSequenceEncoder:
         rev = self.rcmap[fwd[::-1]]
         starts = np.arange(0, fwd.shape[0], self.step)
         ends = np.minimum(starts + self.window, fwd.shape[0])
-        batches = np.zeros((2 * len(starts), self.window), dtype=int) + self.padval
+        batches = np.zeros((2 * len(starts), self.window), dtype=np.uint8) + self.padval
         for i, (s, e) in enumerate(zip(starts, ends)):
             l = e - s
             batches[2 * i][:l] = fwd[s:e]
@@ -75,12 +75,12 @@ class FastaSequenceEncoder:
     @staticmethod
     def get_dna_map(vocab=None):
         '''
-        create a DNA map with some redundancy so that we can
-        do base-complements with +/% operations.
-        Using this scheme, the complement of a base should be:
-        (base_integer + 9) % 18
-        chars[(basemap[ord('N')]+9)%18]
-        For this to work, bases need to be ordered as they are below
+        Create data structures for mapping DNA sequence to
+
+        Returns
+            vocab:      the DNA vocabulary used for building the data structures
+            basemap:    a 128 element array for mapping ASCII character values to encoded values
+            rcmap:      an array for mapping between complementary characters of encoded values
         '''
         if vocab is None:
             vocab = ('ACYWSKDVNTGRMHB')

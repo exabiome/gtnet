@@ -15,7 +15,7 @@ with open('README.md', 'r') as fp:
     readme = fp.read()
 
 reqs = ['numpy',
-        'onnxruntime',
+        'onnxruntime-gpu',
         'pandas',
         'ruamel.yaml',
         'scikit-bio']
