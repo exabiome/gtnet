@@ -15,9 +15,8 @@ with open('README.md', 'r') as fp:
     readme = fp.read()
 
 reqs = ['numpy',
-        'onnxruntime-gpu',
         'pandas',
-        'ruamel.yaml',
+        'torch',
         'scikit-bio']
 
 setup_args = {
@@ -59,7 +58,7 @@ setup_args = {
     'zip_safe': False,
     'entry_points':{
         'console_scripts': [
-            'gtnet = gtnet.run_gtnet:gtnet_run'
+            'gtnet = gtnet.main:run'
         ]
     },
 }
