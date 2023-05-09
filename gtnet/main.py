@@ -16,6 +16,8 @@ class Command:
 command_dict = {
     'predict':  Command('run.run_torchscript_inference',
                         'Predict taxonomy of provided sequence(s)'),
+    'filter':   Command('filter.filter_classifications',
+                        'Filter low confidence taxonomic classifications'),
     'test':     Command('run.run_test', 'Run gtnet on a sample dataset provided'),
 }
 
@@ -30,7 +32,7 @@ def print_help():
     print()
 
 
-def gtnet_run():
+def run():
     if len(sys.argv) == 1 or sys.argv[1] in ('help', '-h', '--help'):
         print_help()
     else:
