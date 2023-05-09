@@ -1,16 +1,24 @@
 import logging
-import multiprocessing as mp
 
 import numpy as np
 import skbio
 from skbio.sequence import DNA
+import torch
+import torch.nn.functional as F
+
+
+import torch.multiprocessing as mp
+try:
+    mp.set_start_method('spawn')
+except RuntimeError:
+    pass
 
 __all__ = ['FastaSequenceEncoder', 'FastaReader']
 
 
 class FastaSequenceEncoder:
 
-    def __init__(self, window, step, vocab=None, padval=None):
+    def __init__(self, window, step, vocab=None, padval=None, min_seq_len=100, device=torch.device('cpu')):
         self.window = window
         self.step = step
         self.vocab, self.basemap, self.rcmap = self.get_dna_map(vocab=vocab)
@@ -19,6 +27,10 @@ class FastaSequenceEncoder:
         else:
             self.padval = padval
 
+        self.padval = self.padval
+        self.min_seq_len = min_seq_len
+        self.device = device
+
     def encode(self, seq):
         if seq.dtype == np.dtype('S1'):
             seq = seq.view(np.uint8)
@@ -26,16 +38,22 @@ class FastaSequenceEncoder:
             seq = seq.astype('S').view(np.uint8)
         elif seq.dtype != np.uint8:
             raise ValueError('seq must be bytes or uint8')
+
+        # TODO: figure out how to pad
+        C_min = len(seq) % self.step
+        if C_min == 0:
+            C_min = self.step
+        n_short_C = max(((self.min_seq_len - C_min - 1) // self.step) + 1, 0)
+        n_C = (len(seq) - 1) // self.step + 1
+        n_chunks = n_C - n_short_C
+        padlen = len(seq) - ((n_chunks - 1) * self.step + self.window)
+
         fwd = self.basemap[seq]
         rev = self.rcmap[fwd[::-1]]
-        starts = np.arange(0, fwd.shape[0], self.step)
-        ends = np.minimum(starts + self.window, fwd.shape[0])
-        batches = np.zeros((2 * len(starts), self.window), dtype=np.uint8) + self.padval
-        for i, (s, e) in enumerate(zip(starts, ends)):
-            l = e - s
-            batches[2 * i][:l] = fwd[s:e]
-            batches[2 * i + 1][:l] = rev[s:e]
-        return batches
+        fwd = F.pad(torch.from_numpy(fwd), (0, padlen), "constant", self.padval)
+        rev = F.pad(torch.from_numpy(rev), (0, padlen), "constant", self.padval)
+
+        return torch.cat([fwd, rev]).to(self.device).unfold(0, self.window, self.step)
 
     @classmethod
     def get_dna_map(cls, vocab=None):

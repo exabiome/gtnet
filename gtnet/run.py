@@ -86,7 +86,7 @@ def run_torchscript_inference(argv=None):
     reader = FastaReader(encoder)
 
     if use_gpu:
-        model = GPUModel(model, torch.device(0))
+        model = model.to(torch.device(0))
 
     output_size = sum(len(lvl['taxa']) for lvl in conf_models.values())
 
@@ -107,7 +107,7 @@ def run_torchscript_inference(argv=None):
         # sum network outputs from all chunks
         for s in range(0, len(seq_chunks), args.n_chunks):
             e = s + args.n_chunks
-            outputs += model(torch.from_numpy(seq_chunks[s:e])).sum(dim=0)
+            outputs += model(seq_chunks[s:e]).sum(dim=0)
         # divide by the number of seq_chunks we processed to get a mean output
         outputs /= len(seq_chunks)
 
