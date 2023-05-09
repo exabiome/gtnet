@@ -62,6 +62,8 @@ def run_torchscript_inference(argv=None):
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
     if torch.cuda.is_available():
         parser.add_argument('-g', '--gpu', action='store_true', default=False, help='Use GPU')
+        parser.add_argument('-D', '--device_id', type=int, default=0, choices=torch.arange(torch.cuda.device_count()).tolist(),
+                            help='the device ID of the GPU to use')
     parser.add_argument('-d', '--debug', action='store_true', default=False, help='print specific information about sequences')
 
     args = parser.parse_args(argv)
@@ -76,17 +78,20 @@ def run_torchscript_inference(argv=None):
         logger.setLevel(logging.DEBUG)
 
     use_gpu = getattr(args, 'gpu', False)
+    if use_gpu:
+        device = torch.device(args.device_id)
+    else:
+        device = torch.device('cpu')
 
     model, conf_models, train_conf, vocab = _load_deploy_pkg()
 
     window = train_conf['window']
     step = train_conf['step']
 
-    encoder = FastaSequenceEncoder(window, step, vocab=vocab)
+    encoder = FastaSequenceEncoder(window, step, vocab=vocab, device=device)
     reader = FastaReader(encoder)
 
-    if use_gpu:
-        model = model.to(torch.device(0))
+    model = model.to(device)
 
     output_size = sum(len(lvl['taxa']) for lvl in conf_models.values())
 
@@ -103,7 +108,7 @@ def run_torchscript_inference(argv=None):
         filepaths.append(file_path)
 
         logger.debug(f'getting outputs for {seqnames[-1]}, {len(seq_chunks)} chunks, {lengths[-1]} bases')
-        outputs = torch.zeros(output_size)   # the output from the network for a single sequence
+        outputs = torch.zeros(output_size, device=device)   # the output from the network for a single sequence
         # sum network outputs from all chunks
         for s in range(0, len(seq_chunks), args.n_chunks):
             e = s + args.n_chunks
@@ -113,11 +118,12 @@ def run_torchscript_inference(argv=None):
 
         aggregated.append(outputs)
 
-    lengths = torch.Tensor(lengths)
+    lengths = torch.tensor(lengths, device=device)
 
 
     # aggregate everything we just pulled from the fasta file
     all_levels_aggregated = torch.row_stack(aggregated)
+    del aggregated
 
     output_data = {'ID': seqnames}
     if len(args.fasta) > 1:
@@ -127,7 +133,7 @@ def run_torchscript_inference(argv=None):
     for lvl, e in zip(model.levels, model.parse):
         conf_model_info = conf_models[lvl]
         taxa = conf_model_info['taxa']
-        conf_model = conf_model_info['model']
+        conf_model = conf_model_info['model'].to(device)
 
         # determine the number of top k probabilities
         # to use for confidence scoring
@@ -135,7 +141,7 @@ def run_torchscript_inference(argv=None):
 
         logger.info(f'Getting {lvl} predictions')
         aggregated = all_levels_aggregated[:, s:e]
-        output_data[lvl] = taxa[torch.argmax(aggregated, dim=1)]
+        output_data[lvl] = taxa[torch.argmax(aggregated, dim=1).cpu()]
 
         # get prediction and maximum probabilities for confidence scoring
         logger.info(f'Getting max {top_k} probabilities for {lvl}')
@@ -145,7 +151,7 @@ def run_torchscript_inference(argv=None):
         logger.info('Calculating confidence probabilities')
         conf_input = torch.column_stack([lengths, maxprobs])
 
-        output_data[f'{lvl}_prob'] = conf_model(conf_input).numpy().squeeze()
+        output_data[f'{lvl}_prob'] = conf_model(conf_input).cpu().numpy().squeeze()
 
         # set next left bound for all_levels_aggregated
         s = e
