@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import numpy as np
 import skbio
@@ -39,21 +40,26 @@ class FastaSequenceEncoder:
         elif seq.dtype != np.uint8:
             raise ValueError('seq must be bytes or uint8')
 
-        # TODO: figure out how to pad
+        fwd = self.basemap[seq]
+        rev = self.rcmap[fwd[::-1]]
+        fwd = torch.from_numpy(fwd)
+        rev = torch.from_numpy(rev)
+
         C_min = len(seq) % self.step
         if C_min == 0:
             C_min = self.step
         n_short_C = max(((self.min_seq_len - C_min - 1) // self.step) + 1, 0)
         n_C = (len(seq) - 1) // self.step + 1
         n_chunks = n_C - n_short_C
-        padlen = len(seq) - ((n_chunks - 1) * self.step + self.window)
+        padlen =  (n_chunks - 1) * self.step + self.window - len(seq)
 
-        fwd = self.basemap[seq]
-        rev = self.rcmap[fwd[::-1]]
-        fwd = F.pad(torch.from_numpy(fwd), (0, padlen), "constant", self.padval)
-        rev = F.pad(torch.from_numpy(rev), (0, padlen), "constant", self.padval)
+        fwd = F.pad(fwd, (0, padlen), "constant", self.padval)
+        rev = F.pad(rev, (0, padlen), "constant", self.padval)
 
-        return torch.cat([fwd, rev]).to(self.device).unfold(0, self.window, self.step)
+        ret = torch.row_stack([fwd, rev]).to(self.device)
+        ret = ret.unfold(1, self.window, self.step)
+
+        return ret
 
     @classmethod
     def get_dna_map(cls, vocab=None):
@@ -98,7 +104,7 @@ class FastaSequenceEncoder:
         }
 
         d = {c: i for i, c in enumerate(vocab)}
-        rcmap = np.zeros(len(vocab), dtype=int)
+        rcmap = np.zeros(len(vocab), dtype=np.uint8)
         for i, base in enumerate(vocab):
             rc_base = chars[base]
             base_i = d[base]
@@ -115,24 +121,24 @@ class FastaReader(mp.Process):
         self.encoder = encoder
         self.fastas = fastas
 
-    def _target(self, q, fastas):
+    @classmethod
+    def _target(cls, q, fastas, encoder, finished):
         i = 0
         for fa in fastas:
             logging.debug(f'loading {fa}')
             for seq in skbio.read(fa, format='fasta', constructor=DNA, validate=False):
-                batches = self.encoder.encode(seq.values)
+                batches = encoder.encode(seq.values)
                 val = (fa, seq.metadata['id'], len(seq), batches)
-                q.put(val)
+                result = q.put(val)
             i += 1
-        q.put(self._done)
-
-    def read(self, fastas):
-        self._q = mp.Queue()
-        self._proc = mp.Process(target=self._target, args=(self._q, fastas))
-        self._proc.start()
-        return self
+        q.put(cls._done)
+        finished.wait()
 
     def __iter__(self):
+        self._q = mp.Queue()
+        self._finished = mp.Event()
+        self._proc = mp.Process(target=self._target, args=(self._q, self.fastas, self.encoder, self._finished))
+        self._proc.start()
         return self
 
     def __next__(self):
@@ -140,6 +146,7 @@ class FastaReader(mp.Process):
         while True:
             seq = self._q.get()
             if seq == self._done:
+                self._finished.set()
                 self._proc.join()
                 raise StopIteration
             break

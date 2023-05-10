@@ -56,9 +56,8 @@ def run_torchscript_inference(argv=None):
     epi = ("")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
-    parser.add_argument('fasta', nargs='+', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('fasta', nargs='?', type=str, help='the Fasta files to do taxonomic classification on')
     parser.add_argument('-c', '--n_chunks', type=int, default=10000, help='the number of sequence chunks to process at a time')
-    parser.add_argument('-F', '--fof', action='store_true', default=False, help='a file-of-files was passed in')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
     if torch.cuda.is_available():
         parser.add_argument('-g', '--gpu', action='store_true', default=False, help='Use GPU')
@@ -69,9 +68,6 @@ def run_torchscript_inference(argv=None):
     args = parser.parse_args(argv)
 
     before = time()
-    if args.fof:
-        with open(args.fasta[0], 'r') as f:
-            args.fasta = [s.strip() for s in f.readlines()]
 
     logger = get_logger()
     if args.debug:
@@ -89,7 +85,7 @@ def run_torchscript_inference(argv=None):
     step = train_conf['step']
 
     encoder = FastaSequenceEncoder(window, step, vocab=vocab, device=device)
-    reader = FastaReader(encoder)
+    reader = FastaReader(encoder, args.fasta)
 
     model = model.to(device)
 
@@ -102,19 +98,22 @@ def run_torchscript_inference(argv=None):
 
     torch.set_grad_enabled(False)
 
-    for file_path, seq_name, seq_len, seq_chunks in reader.read(args.fasta):
+    logger.info(f'Calculating classifications for all sequences in {args.fasta}')
+    for file_path, seq_name, seq_len, seq_chunks in reader:
         seqnames.append(seq_name)
         lengths.append(seq_len)
         filepaths.append(file_path)
 
-        logger.debug(f'getting outputs for {seqnames[-1]}, {len(seq_chunks)} chunks, {lengths[-1]} bases')
+        logger.debug(f'Getting predictions for windows of {seqnames[-1]}, {seq_chunks.shape[1] * 2} chunks, {lengths[-1]} bases')
         outputs = torch.zeros(output_size, device=device)   # the output from the network for a single sequence
         # sum network outputs from all chunks
         for s in range(0, len(seq_chunks), args.n_chunks):
             e = s + args.n_chunks
-            outputs += model(seq_chunks[s:e]).sum(dim=0)
+            outputs += model(seq_chunks[0, s:e]).sum(dim=0)
+            outputs += model(seq_chunks[1, s:e]).sum(dim=0)
         # divide by the number of seq_chunks we processed to get a mean output
-        outputs /= len(seq_chunks)
+        outputs /= (seq_chunks.shape[1] * 2)
+        del seq_chunks
 
         aggregated.append(outputs)
 
@@ -139,16 +138,16 @@ def run_torchscript_inference(argv=None):
         # to use for confidence scoring
         top_k = 2
 
-        logger.info(f'Getting {lvl} predictions')
+        logger.info(f'Getting {lvl} predictions for all sequences')
         aggregated = all_levels_aggregated[:, s:e]
         output_data[lvl] = taxa[torch.argmax(aggregated, dim=1).cpu()]
 
         # get prediction and maximum probabilities for confidence scoring
-        logger.info(f'Getting max {top_k} probabilities for {lvl}')
+        logger.debug(f'Getting max {top_k} probabilities for {lvl}')
         maxprobs = torch.topk(aggregated, top_k, dim=1, largest=True, sorted=True).values
 
         # build input matrix for confidence model
-        logger.info('Calculating confidence probabilities')
+        logger.debug('Calculating confidence probabilities')
         conf_input = torch.column_stack([lengths, maxprobs])
 
         output_data[f'{lvl}_prob'] = conf_model(conf_input).cpu().numpy().squeeze()
