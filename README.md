@@ -8,6 +8,16 @@ Downloading current model
 curl -L -O -J --output-dir gtnet `tail -n 1 models.csv | cut -f2 -d,`
 ```
 
+## Running GTNet
+Getting predictions for all sequenes in a Fasta file
+```bash
+gtnet predict data/small.fna > data/small.tax.csv
+```
+
+Filtering predictions 
+```bash
+gtnet filter --fpr 0.05 data/small.tax.csv > data/small.tax.filt.csv
+```
 
 LICENSE
 =======
