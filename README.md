@@ -1,5 +1,13 @@
-# gtnet
+GTNet
+=====
 The Genome Taxonomy Network for assigning microbial taxonomy to DNA sequences
+
+## Getting started
+Downloading current model
+```bash
+curl -L -O -J --output-dir gtnet `tail -n 1 models.csv | cut -f2 -d,`
+```
+
 
 LICENSE
 =======
