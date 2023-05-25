@@ -125,8 +125,6 @@ def run_torchscript_inference(argv=None):
     del aggregated
 
     output_data = {'ID': seqnames}
-    if len(args.fasta) > 1:
-        output_data['filename'] = filepaths
 
     s = 0
     for lvl, e in zip(model.levels, model.parse):
