@@ -8,7 +8,7 @@ authors = [
   { name="Andrew Tritt", email="ajtritt@lbl.gov" },
   { name="Ryan Ly", email="rly@lbl.gov" },
 ]
-description = "The Genome Taxonomy Network"
+description = "A package for running Genome Taxonomy Network predictions"
 readme = "README.md"
 requires-python = ">=3.7"
 license = {text = "BSD-3-Clause"}
@@ -41,7 +41,7 @@ keywords = [
 dependencies = [
     "numpy",
     "pandas",
-    "pytorch",
+    "torch",
     "scikit-bio",
 ]
 version = "0.0.1"
@@ -50,6 +50,9 @@ version = "0.0.1"
 [project.urls]
 "Homepage" = "https://github.com/exabiome/gtnet"
 "Bug Tracker" = "https://github.com/exabiome/gtnet/issues"
+
+[project.scripts]
+gtnet = "gtnet.main:run"
 
 # [tool.setuptools.package-data]
 # gtnet = ["gtnet/deploy_pkg/*"]
