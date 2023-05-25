@@ -41,3 +41,6 @@ def run():
         cmd = sys.argv[1]
         func = command_dict[cmd].get_func()
         func(sys.argv[2:])
+
+if __name__ == '__main__':
+    run()
