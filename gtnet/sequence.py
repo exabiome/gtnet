@@ -27,6 +27,9 @@ class FastaSequenceEncoder:
         else:
             self.padval = padval
 
+        if min_seq_len > window:
+            raise ValueError("min_seq_len must be less than or equal to window")
+
         self.padval = self.padval
         self.min_seq_len = min_seq_len
         self.device = device
