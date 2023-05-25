@@ -1,4 +1,3 @@
-import multiprocessing as mp
 import tempfile
 
 import numpy as np
@@ -22,8 +21,8 @@ def get_fasta():
           "AAACCCTTGCCGGTACGCTTAAACCATTGCCGGTACGCTT"]
     _, path = tempfile.mkstemp()
     with open(path, 'w') as f:
-        for l in fl:
-            print(l, file=f)
+        for line in fl:
+            print(line, file=f)
     return path
 
 
@@ -31,7 +30,6 @@ def test_encoder():
     encoder = FastaSequenceEncoder(3, 2, vocab=VOCAB)
     seq = np.array(list("ACTGNGTCNA"))
     batch = encoder.encode(seq)
-    print(len(seq), batch.shape)
     expected = np.array([
         [  0,  1,  9],  # ACT
         [  9,  8, 10],  # TNG
