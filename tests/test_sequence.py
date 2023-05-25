@@ -27,30 +27,32 @@ def get_fasta():
 
 
 def test_encoder():
-    encoder = FastaSequenceEncoder(3, 2, vocab=VOCAB)
+    encoder = FastaSequenceEncoder(3, 2, vocab=VOCAB, min_seq_len=1)
     seq = np.array(list("ACTGNGTCNA"))
     batch = encoder.encode(seq)
     expected = np.array([
-        [  0,  1,  9],  # ACT
-        [  9,  8, 10],  # TNG
-        [  9, 10,  8],  # TGN
-        [ 10,  0,  1],  # GAC
-        [  8, 10,  9],  # NGT
-        [  1,  8,  1],  # CNC
-        [  9,  1,  8],  # TCN
-        [  1,  0, 10],  # CAG
-        [  8,  0,  8],  # NA
-        [ 10,  9,  8],  # GT
+        [[  0,  1,  9],   # ACT
+         [  9, 10,  8],   # TGN
+         [  8, 10,  9],   # NGT
+         [  9,  1,  8],   # TCN
+         [  8,  0,  8]],  # NA
+
+        [[  9,  8, 10],   # TNG
+         [ 10,  0,  1],   # GAC
+         [  1,  8,  1],   # CNC
+         [  1,  0, 10],   # CAG
+         [ 10,  9,  8]]   # GT
+
     ])
     np.testing.assert_array_equal(expected, batch)
 
 
 def test_reader():
     encoder = FastaSequenceEncoder(8, 2, vocab=VOCAB)
-    reader = FastaReader(encoder)
     fa = get_fasta()
+    reader = FastaReader(encoder, fa)
     i = 0
-    for seq in reader.read([fa]):
+    for seq in reader:
         assert len(seq) == 4
         i += 1
     assert i == 5
