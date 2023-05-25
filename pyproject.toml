@@ -54,6 +54,9 @@ version = "0.0.1"
 [project.scripts]
 gtnet = "gtnet.main:run"
 
+[tool.setuptools]
+py-modules = []
+
 # [tool.setuptools.package-data]
 # gtnet = ["gtnet/deploy_pkg/*"]
 
