@@ -48,7 +48,7 @@ def test_encoder():
 
 
 def test_reader():
-    encoder = FastaSequenceEncoder(8, 2, vocab=VOCAB)
+    encoder = FastaSequenceEncoder(8, 2, vocab=VOCAB, min_seq_len=4)
     fa = get_fasta()
     reader = FastaReader(encoder, fa)
     i = 0
