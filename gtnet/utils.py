@@ -2,6 +2,8 @@ import json
 import logging
 import os
 import sys
+import warnings
+import zipfile
 
 from pkg_resources import resource_filename
 
@@ -26,8 +28,23 @@ def get_logger():
 class DeployPkg:
     """A class to handle loading and manipulating the deployment package"""
 
+    deploy_pkg_url = "https://osf.io/mwgb9/metadata/?format=datacite-json"
+
+    @classmethod
+    def check_pkg(cls):
+        deploy_dir = resource_filename(__name__, 'deploy_pkg')
+        if not os.path.exists(deploy_dir):
+            warnings.warn(f"Downloading GTNet deployment package")
+            zip_path = resource_filename(__name__, 'deploy_pkg.zip')
+            urllib.request.urlretrieve(cls.deploy_pkg_url, zip_path)
+            with zipfile.ZipFile(zip_path) as zip_ref:
+                zip_ref.extractall(os.path.dirname(deploy_dir))
+        return deploy_dir
+
+
     def __init__(self):
-        self.deploy_dir = resource_filename(__name__, 'deploy_pkg')
+        self.deploy_dir = self.check_pkg()
+
         self._manifest = None
 
     def path(self, path):
