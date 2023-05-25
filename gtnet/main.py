@@ -1,3 +1,4 @@
+import io
 import sys
 from importlib import import_module
 
@@ -23,13 +24,14 @@ command_dict = {
 
 
 def print_help():
-    print('Usage: gtnet <command> [options]')
-    print('Available commands are:\n')
+    sio = io.StringIO()
+    print('Usage: gtnet <command> [options]', file=sio)
+    print('Available commands are:\n', file=sio)
     for c, f in command_dict.items():
         nspaces = 16 - len(c)
-        print(f'    {c}' + ' '*nspaces + f.doc)
-    print('    help            print this usage statememt')
-    print()
+        print(f'    {c}' + ' '*nspaces + f.doc, file=sio)
+    print('    help            print this usage statememt\n', file=sio)
+    sys.stdout.write(sio.getvalue())
 
 
 def run():

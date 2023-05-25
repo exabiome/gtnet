@@ -1,14 +1,10 @@
 import argparse
-import json
 import logging
-import os
-import pickle
 import sys
 from time import time
 
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
 import torch
 import torch.nn as nn
 
@@ -57,13 +53,16 @@ def run_torchscript_inference(argv=None):
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
     parser.add_argument('fasta', nargs='?', type=str, help='the Fasta files to do taxonomic classification on')
-    parser.add_argument('-c', '--n_chunks', type=int, default=10000, help='the number of sequence chunks to process at a time')
+    parser.add_argument('-c', '--n_chunks', type=int, default=10000,
+                        help='the number of sequence chunks to process at a time')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
     if torch.cuda.is_available():
         parser.add_argument('-g', '--gpu', action='store_true', default=False, help='Use GPU')
-        parser.add_argument('-D', '--device_id', type=int, default=0, choices=torch.arange(torch.cuda.device_count()).tolist(),
+        parser.add_argument('-D', '--device_id', type=int, default=0,
+                            choices=torch.arange(torch.cuda.device_count()).tolist(),
                             help='the device ID of the GPU to use')
-    parser.add_argument('-d', '--debug', action='store_true', default=False, help='print specific information about sequences')
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
+                        help='print specific information about sequences')
 
     args = parser.parse_args(argv)
 
@@ -104,7 +103,8 @@ def run_torchscript_inference(argv=None):
         lengths.append(seq_len)
         filepaths.append(file_path)
 
-        logger.debug(f'Getting predictions for windows of {seqnames[-1]}, {seq_chunks.shape[1] * 2} chunks, {lengths[-1]} bases')
+        logger.debug((f'Getting predictions for windows of {seqnames[-1]}, '
+                      f'{seq_chunks.shape[1] * 2} chunks, {lengths[-1]} bases'))
         outputs = torch.zeros(output_size, device=device)   # the output from the network for a single sequence
         # sum network outputs from all chunks
         for s in range(0, len(seq_chunks), args.n_chunks):

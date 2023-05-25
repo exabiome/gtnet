@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import numpy as np
 import skbio
@@ -129,7 +128,7 @@ class FastaReader(mp.Process):
             for seq in skbio.read(fa, format='fasta', constructor=DNA, validate=False):
                 batches = encoder.encode(seq.values)
                 val = (fa, seq.metadata['id'], len(seq), batches)
-                result = q.put(val)
+                q.put(val)
             i += 1
         q.put(cls._done)
         finished.wait()

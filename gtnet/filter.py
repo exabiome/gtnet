@@ -1,18 +1,11 @@
 import argparse
-import json
-import logging
-import os
-import pickle
 import sys
 from time import time
 
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
-import torch
 import torch.nn as nn
 
-from .sequence import FastaReader, FastaSequenceEncoder
 from .utils import get_logger, DeployPkg
 
 
@@ -49,7 +42,8 @@ def filter_classifications(argv=None):
     parser.add_argument('csv', nargs='?', type=str, help='the Fasta files to do taxonomic classification on')
     parser.add_argument('-f', '--fpr', default=0.05, type=float, help='the false-positive rate to classify to')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
-    parser.add_argument('-d', '--debug', action='store_true', default=False, help='print specific information about sequences')
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
+                        help='print specific information about sequences')
 
     args = parser.parse_args(argv)
 
