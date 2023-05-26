@@ -42,7 +42,6 @@ dependencies = [
     "numpy",
     "pandas",
     "torch",
-    "scikit-bio",
 ]
 version = "0.0.1"
 # dynamic = ["version"]

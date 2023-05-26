@@ -1,8 +1,7 @@
+from itertools import chain
 import logging
 
 import numpy as np
-import skbio
-from skbio.sequence import DNA
 import torch
 import torch.nn.functional as F
 
@@ -39,8 +38,8 @@ class FastaSequenceEncoder:
             seq = seq.view(np.uint8)
         elif seq.dtype == np.dtype('U1'):
             seq = seq.astype('S').view(np.uint8)
-        elif seq.dtype != np.uint8:
-            raise ValueError('seq must be bytes or uint8')
+        elif not issubclass(seq.dtype.type, np.integer):
+            raise ValueError('seq must be bytes or integer type')
 
         fwd = self.basemap[seq]
         rev = self.rcmap[fwd[::-1]]
@@ -115,24 +114,54 @@ class FastaSequenceEncoder:
         return rcmap
 
 
-class FastaReader(mp.Process):
-
-    _done = 0xDEADBEEF
+class Loader:
 
     def __init__(self, encoder, *fastas):
         self.encoder = encoder
         self.fastas = fastas
 
+    @staticmethod
+    def readfile(fasta_path):
+        chars = None
+        seqid = None
+        with open(fasta_path, 'rb') as f:
+            while True:
+                line = f.readline()
+                if not line:
+                    yield seqid, np.fromiter(chain(*chars), dtype=np.uint8)
+                    break
+                if line[0] == 62:
+                    if seqid is not None:
+                        yield seqid, np.fromiter(chain(*chars), dtype=np.uint8)
+                    seqid = line[1:line.find(32)].decode('utf8')
+                    chars = list()
+                else:
+                    chars.append(line[:-1])
+
     @classmethod
-    def _target(cls, q, fastas, encoder, finished):
-        i = 0
+    def readfiles(cls, encoder, fastas):
         for fa in fastas:
             logging.debug(f'loading {fa}')
-            for seq in skbio.read(fa, format='fasta', constructor=DNA, validate=False):
-                batches = encoder.encode(seq.values)
-                val = (fa, seq.metadata['id'], len(seq), batches)
-                q.put(val)
-            i += 1
+            for seqid, values in cls.readfile(fa):
+                batches = encoder.encode(values)
+                val = (fa, seqid, len(values), batches)
+                yield val
+
+
+class SerialLoader(Loader):
+
+    def __iter__(self):
+        return self.readfiles(self.encoder, self.fastas)
+
+
+class ParallelLoader(Loader):
+
+    _done = 0xDEADBEEF
+
+    @classmethod
+    def _target(cls, q, fastas, encoder, finished):
+        for val in cls.readfiles(encoder, fastas):
+            q.put(val)
         q.put(cls._done)
         finished.wait()
 
@@ -153,3 +182,16 @@ class FastaReader(mp.Process):
                 raise StopIteration
             break
         return seq
+
+
+class FastaReader(mp.Process):
+
+
+    def __init__(self, encoder, *fastas, parallel=False):
+        if parallel:
+            self.loader = ParallelLoader(encoder, *fastas)
+        else:
+            self.loader = SerialLoader(encoder, *fastas)
+
+    def __iter__(self):
+        return iter(self.loader)
