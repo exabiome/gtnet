@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -28,15 +29,22 @@ def get_logger():
 class DeployPkg:
     """A class to handle loading and manipulating the deployment package"""
 
-    deploy_pkg_url = "https://osf.io/mwgb9/metadata/?format=datacite-json"
+    _deploy_pkg_url = "https://osf.io/download/mwgb9/"
+
+    _checksum = "0245fcf825bfe4de0770fcb46798ca90"
 
     @classmethod
     def check_pkg(cls):
         deploy_dir = resource_filename(__name__, 'deploy_pkg')
         if not os.path.exists(deploy_dir):
-            warnings.warn(f"Downloading GTNet deployment package")
+            msg = ("Downloading GTNet deployment package. This will only happen on the first invocation "
+                   "of gtnet predict")
+            warnings.warn(msg)
             zip_path = resource_filename(__name__, 'deploy_pkg.zip')
-            urllib.request.urlretrieve(cls.deploy_pkg_url, zip_path)
+            urllib.request.urlretrieve(cls._deploy_pkg_url, zip_path)
+            dl_checksum = hashlib.md5(open(zip_path,'rb').read()).hexdigest()
+            if dl_checksum != cls._checksum:
+                raise ValueError(f"Downloaded deployment package {zip_path} does not match expected checksum")
             with zipfile.ZipFile(zip_path) as zip_ref:
                 zip_ref.extractall(os.path.dirname(deploy_dir))
         return deploy_dir
