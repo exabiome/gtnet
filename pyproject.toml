@@ -44,7 +44,6 @@ dependencies = [
     "torch",
 ]
 version = "0.0.1"
-# dynamic = ["version"]
 
 [project.urls]
 "Homepage" = "https://github.com/exabiome/gtnet"
@@ -52,19 +51,6 @@ version = "0.0.1"
 
 [project.scripts]
 gtnet = "gtnet.main:run"
-
-[tool.setuptools]
-py-modules = ["gtnet"]
-
-# [tool.setuptools.package-data]
-# gtnet = ["gtnet/deploy_pkg/*"]
-
-# [tool.mypy]
-# no_incremental = true  # needed b/c mypy and ruamel.yaml do not play nice. https://github.com/python/mypy/issues/12664
-
-# [tool.interrogate]
-# fail-under = 95
-# verbose = 1
 
 [tool.pytest.ini_options]
 addopts = "--cov --cov-report html"
@@ -85,12 +71,6 @@ exclude_lines = [
 ]
 
 [tool.setuptools_scm]
-
-# [tool.black]
-# line-length = 120
-# preview = true
-# exclude = ".git|.mypy_cache|.tox|.venv|venv|.ipynb_checkpoints|_build/|dist/|__pypackages__|.ipynb"
-# force-exclude = "docs/gallery"
 
 [tool.ruff]
 select = ["E", "F", "T100", "T201", "T203"]
