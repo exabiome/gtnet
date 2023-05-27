@@ -12,7 +12,7 @@ from pkg_resources import resource_filename
 
 def parse_logger(string):
     if not string:
-        ret = logging.getLogger('stdout')
+        ret = logging.getLogger()
         hdlr = logging.StreamHandler(sys.stderr)
     else:
         ret = logging.getLogger(string)
