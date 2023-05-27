@@ -3,16 +3,24 @@ GTNet
 The Genome Taxonomy Network for assigning microbial taxonomy to DNA sequences
 
 ## Getting started
-Downloading current model
+Installing GTNet from PyPI
 ```bash
-curl -L -O -J --output-dir gtnet `tail -n 1 models.csv | cut -f2 -d,`
+pip install gtnet
+```
+
+Installing GTNet from source
+```bash
+pip install git+https://github.com/exabiome/gtnet.git
 ```
 
 ## Running GTNet
-Getting predictions for all sequenes in a Fasta file
+Getting predictions for all sequences in a Fasta file.
 ```bash
 gtnet predict data/small.fna > data/small.tax.csv
 ```
+The first time you run `predict`, the model file will be downloaded and stored in the
+same directory that the `gtnet` package is installed in. Thefore, for the this to be successful,
+you must have write privileges on the directory that `gtnet` is installed in.
 
 Filtering predictions 
 ```bash
