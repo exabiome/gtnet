@@ -52,7 +52,7 @@ def run_torchscript_inference(argv=None):
     epi = ("")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
-    parser.add_argument('fasta', nargs='?', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('fasta', type=str, help='the Fasta files to do taxonomic classification on')
     parser.add_argument('-c', '--n_chunks', type=int, default=10000,
                         help='the number of sequence chunks to process at a time')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
