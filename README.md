@@ -19,7 +19,7 @@ Getting predictions for all sequences in a Fasta file.
 gtnet predict data/small.fna > data/small.tax.csv
 ```
 The first time you run `predict`, the model file will be downloaded and stored in the
-same directory that the `gtnet` package is installed in. Thefore, for the this to be successful,
+same directory that the `gtnet` package is installed in. Therefore, for the this to be successful,
 you must have write privileges on the directory that `gtnet` is installed in.
 
 Filtering predictions 
