@@ -57,7 +57,7 @@ addopts = "--cov --cov-report html"
 norecursedirs = "tests/unit/helpers"
 
 [tool.codespell]
-skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,./docs/_build/*,*.ipynb"
+skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,./docs/_build/*,*.ipynb,./src/gtnet/deploy_pkg"
 ignore-words-list = "datas,fpr"
 
 [tool.coverage.run]
