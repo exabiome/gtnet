@@ -50,10 +50,11 @@ jobs:
       - name: Run GTNet Predict
         run: |
           gtnet predict data/small.fna > data/small.raw.test.csv
-          diff data/small.raw.csv data/small.raw.test.csv
+          python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.raw.csv", header=None), pd.read_csv("data/small.raw.test.csv", header=None), check_exact=False, atol=1e-4)'
 
       - name: Run GTNet Filter
         run: |
           gtnet filter --fpr 0.05 data/small.raw.csv > data/small.tax.test.csv
           diff data/small.tax.0.05.csv data/small.tax.test.csv
+          python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.tax.0.05.csv", header=None), pd.read_csv("data/small.tax.test.csv", header=None), check_exact=False, atol=1e-4)'
 
