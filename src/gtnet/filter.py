@@ -4,7 +4,6 @@ from time import time
 
 import numpy as np
 import pandas as pd
-import torch.nn as nn
 
 from .utils import get_logger, load_deploy_pkg, write_csv
 

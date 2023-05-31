@@ -79,7 +79,7 @@ class DeployPkg:
 
 
 def load_deploy_pkg(for_predict=False, for_filter=False):
-    if for_predict == for_filter == False:
+    if not (for_predict or for_filter):
         for_predict = True
         for_filter = True
 

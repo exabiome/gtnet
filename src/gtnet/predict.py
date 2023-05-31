@@ -1,14 +1,12 @@
 import argparse
 import logging
-import sys
 from time import time
 
-import numpy as np
 import pandas as pd
 import torch
 
 from .sequence import FastaReader, FastaSequenceEncoder
-from .utils import check_cuda, check_device, get_logger, GPUModel, load_deploy_pkg, write_csv
+from .utils import check_cuda, check_device, get_logger, load_deploy_pkg, write_csv
 
 
 DEFAULT_N_CHUNKS = 10000
