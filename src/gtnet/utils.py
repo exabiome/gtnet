@@ -7,7 +7,10 @@ import urllib
 import warnings
 import zipfile
 
+import numpy as np
 from pkg_resources import resource_filename
+import torch
+import torch.nn as nn
 
 
 def parse_logger(string):
@@ -73,3 +76,70 @@ class DeployPkg:
 
     def __setitem__(self, key, val):
         self.manifest[key] = val
+
+
+def load_deploy_pkg(for_predict=False, for_filter=False):
+    if for_predict == for_filter == False:
+        for_predict = True
+        for_filter = True
+
+    pkg = DeployPkg()
+
+    ret = list()
+    if for_predict:
+        tmp_conf_model = dict()
+        for lvl_dat in pkg['conf_model']:
+            lvl_dat['taxa'] = np.array(lvl_dat['taxa'])
+
+            lvl_dat['model'] = torch.jit.load(pkg.path(lvl_dat.pop('model')))
+
+            tmp_conf_model[lvl_dat['level']] = lvl_dat
+
+        ret.append(torch.jit.load(pkg.path(pkg['nn_model'])))
+        ret.append(tmp_conf_model)
+        ret.append(pkg['training_config'])
+        ret.append("".join(pkg['vocabulary']))
+
+    if for_filter:
+        tmp_roc = dict()
+        for lvl_dat in pkg['conf_model']:
+            tmp_roc[lvl_dat['level']] = np.load(pkg.path(lvl_dat['roc']))
+        ret.append(tmp_roc)
+
+    return tuple(ret) if len(ret) > 1 else ret[0]
+
+
+class GPUModel(nn.Module):
+
+    def __init__(self, model, device):
+        super().__init__()
+        self.device = device
+        self.model = model.to(self.device)
+
+    def forward(self, x):
+        x = x.to(self.device)
+        return self.model(x).cpu()
+
+
+def check_cuda(parser):
+    if torch.cuda.is_available():
+        parser.add_argument('-g', '--gpu', action='store_true', default=False, help='Use GPU')
+        parser.add_argument('-D', '--device_id', type=int, default=0,
+                            choices=torch.arange(torch.cuda.device_count()).tolist(),
+                            help='the device ID of the GPU to use')
+
+
+def check_device(args):
+    if getattr(args, 'gpu', False):
+        return torch.device(args.device_id)
+    return torch.device('cpu')
+
+
+def write_csv(output, args):
+
+    # write out data
+    if args.output is None:
+        outf = sys.stdout
+    else:
+        outf = open(args.output, 'w')
+    output.to_csv(outf, index=True)

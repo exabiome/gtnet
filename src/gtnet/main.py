@@ -15,6 +15,8 @@ class Command:
 
 
 command_dict = {
+    "classify": Command("classify.classify",
+                        "Perform taxonomic classificaiton for all sequences"),
     "predict":  Command("predict.predict",
                         "Predict taxonomy of all sequences at each taxonomic level"),
     "filter":   Command("filter.filter",

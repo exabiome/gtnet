@@ -6,45 +6,12 @@ from time import time
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn as nn
 
 from .sequence import FastaReader, FastaSequenceEncoder
-from .utils import get_logger, DeployPkg
+from .utils import check_cuda, check_device, get_logger, GPUModel, load_deploy_pkg, write_csv
 
 
 DEFAULT_N_CHUNKS = 10000
-
-
-def _load_deploy_pkg():
-    pkg = DeployPkg()
-
-    tmp_conf_model = dict()
-    for lvl_dat in pkg['conf_model']:
-        lvl_dat['taxa'] = np.array(lvl_dat['taxa'])
-
-        lvl_dat['model'] = torch.jit.load(pkg.path(lvl_dat.pop('model')))
-
-        tmp_conf_model[lvl_dat['level']] = lvl_dat
-
-    pkg['conf_model'] = tmp_conf_model
-
-    pkg['vocabulary'] = "".join(pkg['vocabulary'])
-
-    pkg['nn_model'] = torch.jit.load(pkg.path(pkg['nn_model']))
-
-    return pkg['nn_model'], pkg['conf_model'], pkg['training_config'], pkg['vocabulary']
-
-
-class GPUModel(nn.Module):
-
-    def __init__(self, model, device):
-        super().__init__()
-        self.device = device
-        self.model = model.to(self.device)
-
-    def forward(self, x):
-        x = x.to(self.device)
-        return self.model(x).cpu()
 
 
 def predict(argv=None):
@@ -67,11 +34,7 @@ def predict(argv=None):
     parser.add_argument('-c', '--n_chunks', type=int, default=DEFAULT_N_CHUNKS,
                         help='the number of sequence chunks to process at a time')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
-    if torch.cuda.is_available():
-        parser.add_argument('-g', '--gpu', action='store_true', default=False, help='Use GPU')
-        parser.add_argument('-D', '--device_id', type=int, default=0,
-                            choices=torch.arange(torch.cuda.device_count()).tolist(),
-                            help='the device ID of the GPU to use')
+    check_cuda(parser)
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='print specific information about sequences')
 
@@ -83,13 +46,9 @@ def predict(argv=None):
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    use_gpu = getattr(args, 'gpu', False)
-    if use_gpu:
-        device = torch.device(args.device_id)
-    else:
-        device = torch.device('cpu')
+    device = check_device(args)
 
-    model, conf_models, train_conf, vocab = _load_deploy_pkg()
+    model, conf_models, train_conf, vocab = load_deploy_pkg(for_predict=True)
 
     window = train_conf['window']
     step = train_conf['step']
@@ -97,11 +56,7 @@ def predict(argv=None):
     output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab, device=device)
 
     # write out data
-    if args.output is None:
-        outf = sys.stdout
-    else:
-        outf = open(args.output, 'w')
-    output.to_csv(outf, index=True)
+    write_csv(output, args)
 
     after = time()
     logger.info(f'Took {after - before:.1f} seconds')

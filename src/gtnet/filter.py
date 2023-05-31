@@ -6,29 +6,7 @@ import numpy as np
 import pandas as pd
 import torch.nn as nn
 
-from .utils import get_logger, DeployPkg
-
-
-def _load_deploy_pkg():
-    pkg = DeployPkg()
-
-    tmp_roc = dict()
-    for lvl_dat in pkg['conf_model']:
-        tmp_roc[lvl_dat['level']] = np.load(pkg.path(lvl_dat['roc']))
-
-    return tmp_roc
-
-
-class GPUModel(nn.Module):
-
-    def __init__(self, model, device):
-        super().__init__()
-        self.device = device
-        self.model = model.to(self.device)
-
-    def forward(self, x):
-        x = x.to(self.device)
-        return self.model(x).cpu()
+from .utils import get_logger, load_deploy_pkg, write_csv
 
 
 def get_cutoffs(rocs, fpr):
@@ -76,25 +54,20 @@ def filter(argv=None):
 
     logger = get_logger()
 
-    rocs = _load_deploy_pkg()
+    rocs = load_deploy_pkg(for_filter=True)
 
     cutoffs = get_cutoffs(rocs, args.fpr)
 
     df = pd.read_csv(args.csv, index_col='ID')
 
-    output = filter_classifications(df, cutoffs)
-    # write out data
-    if args.output is None:
-        outf = sys.stdout
-    else:
-        outf = open(args.output, 'w')
-    output.to_csv(outf, index=True)
+    output = filter_predictions(df, cutoffs)
+    write_csv(output, args)
 
     after = time()
     logger.info(f'Took {after - before:.1f} seconds')
 
 
-def filter_classifications(pred_df, cutoffs):
+def filter_predictions(pred_df, cutoffs):
     """Filter taxonomic classification predictions
 
     Parameters
