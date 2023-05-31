@@ -15,11 +15,11 @@ class Command:
 
 
 command_dict = {
-    'predict':  Command('run.run_torchscript_inference',
-                        'Predict taxonomy of provided sequence(s)'),
-    'filter':   Command('filter.filter_classifications',
-                        'Filter low confidence taxonomic classifications'),
-    'test':     Command('run.run_test', 'Run gtnet on a sample dataset provided'),
+    "predict":  Command("run.predict",
+                        "Predict taxonomy of all sequences at each taxonomic level"),
+    "filter":   Command("filter.filter_classifications",
+                        "Filter taxonomic classifications from the predict command"),
+    "test":     Command("run.run_test", "Run gtnet on a sample dataset provided"),
 }
 
 
