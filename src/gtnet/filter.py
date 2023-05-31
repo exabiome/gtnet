@@ -31,11 +31,33 @@ class GPUModel(nn.Module):
         return self.model(x).cpu()
 
 
-def filter_classifications(argv=None):
+def get_cutoffs(rocs, fpr):
+    """Get score cutoffs to achieve desired false-positive rate
+
+    Parameters
+    ----------
+
+    rocs : dict
+        The ROC curves for each taxonomic level
+
+    fpr : float
+        The false-positive rate to get the score for
     """
-    Convert a Torch model checkpoint to ONNX format
+    cutoffs = dict()
+    for lvl in rocs:
+        roc = rocs[lvl]
+        idx = np.searchsorted(roc['fpr'], fpr)
+        if idx == 0:
+            cutoffs[lvl] = 1.0
+        else:
+            cutoffs[lvl] = roc['thresh'][idx-1]
+    return cutoffs
+
+
+def filter(argv=None):
+    """Filter raw taxonomic classifications
     """
-    desc = "Run predictions using ONNX"
+    desc = "Filter raw taxonomic classifications"
     epi = ("")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
@@ -56,28 +78,11 @@ def filter_classifications(argv=None):
 
     rocs = _load_deploy_pkg()
 
-    cutoffs = dict()
-    for lvl in rocs:
-        roc = rocs[lvl]
-        idx = np.searchsorted(roc['fpr'], args.fpr)
-        if idx == 0:
-            cutoffs[lvl] = 1.0
-        else:
-            cutoffs[lvl] = roc['thresh'][idx-1]
-
-    levels = ['domain', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+    cutoffs = get_cutoffs(rocs, args.fpr)
 
     df = pd.read_csv(args.csv, index_col='ID')
-    mask = np.ones(len(df), dtype=bool)
-    data = dict()
-    for lvl in levels:
-        probs = df[f'{lvl}_prob']
-        taxa = df[lvl].copy()
-        mask = mask & (probs > cutoffs[lvl])
-        taxa[~mask] = None
-        data[lvl] = taxa
-    output = pd.DataFrame(data)
 
+    output = filter_classifications(df, cutoffs)
     # write out data
     if args.output is None:
         outf = sys.stdout
@@ -87,3 +92,28 @@ def filter_classifications(argv=None):
 
     after = time()
     logger.info(f'Took {after - before:.1f} seconds')
+
+
+def filter_classifications(pred_df, cutoffs):
+    """Filter taxonomic classification predictions
+
+    Parameters
+    ----------
+
+    pred_df : DataFrame
+        The DataFrame containing predictions and confidence scores for each taxonomic level
+
+    cutoffs : dict
+        A dictionary containing the confidence score cutoff for each taxonomic level
+    """
+    levels = ['domain', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+
+    mask = np.ones(len(pred_df), dtype=bool)
+    data = dict()
+    for lvl in levels:
+        probs = pred_df[f'{lvl}_prob']
+        taxa = pred_df[lvl].copy()
+        mask = mask & (probs > cutoffs[lvl])
+        taxa[~mask] = None
+        data[lvl] = taxa
+    return pd.DataFrame(data)
