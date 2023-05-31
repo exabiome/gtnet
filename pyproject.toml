@@ -62,7 +62,7 @@ ignore-words-list = "datas,fpr"
 
 [tool.coverage.run]
 branch = true
-source = ["gtnet/"]
+source = ["src/gtnet/"]
 
 [tool.coverage.report]
 exclude_lines = [
