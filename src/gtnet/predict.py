@@ -62,7 +62,7 @@ def predict(argv=None):
 
 def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_chunks=DEFAULT_N_CHUNKS,
                               device=torch.device('cpu'), logger=None):
-    f"""Run Torchscript inference
+    """Run Torchscript inference
 
     Parameters
     ----------
@@ -86,13 +86,13 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_
     vocab : str
         The vocabulary used for training `model`
 
-    n_chunks : int, default={DEFAULT_N_CHUNKS}
+    n_chunks : int, default=10000
         The length of the step of the sliding window to use for doing inference
 
     device : device, default=torch.device('cpu')
         The Pytorch device to run inference on
 
-    logger : Logger, default=
+    logger : Logger
         The Python logger to use when running inference
     """
 
