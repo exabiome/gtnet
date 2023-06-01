@@ -13,11 +13,11 @@ tools were chosen based on their ease of use for labelling contigs with the GTDB
 approaches underlying these tools.
 
 
-Here are accuracy comparisions for a subset of non-representative GTDB taxa.
+Here are accuracy comparisons for a subset of non-representative GTDB taxa.
 
 .. image:: accuracy.png
 
 
-Here are speed comparisions for a subset of 40 non-representative genomes.
+Here are speed comparisons for a subset of 40 non-representative genomes.
 
 .. image:: runtime.png
