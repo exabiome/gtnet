@@ -153,7 +153,7 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_
         # to use for confidence scoring
         top_k = 2
 
-        logger.info(f'Getting {lvl} predictions for all sequences')
+        logger.debug(f'Getting {lvl} predictions for all sequences')
         aggregated = all_levels_aggregated[:, s:e]
         output_data[lvl] = taxa[torch.argmax(aggregated, dim=1).cpu()]
 

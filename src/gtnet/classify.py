@@ -48,10 +48,14 @@ def classify(argv=None):
     window = train_conf['window']
     step = train_conf['step']
 
-    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab, device=device)
+    logger.info(f'Getting class predictions for each contig in {args.fasta}')
+    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab,
+                                      device=device, logger=logger)
 
+    logger.info(f'Getting probability cutoffs for target false-positive rate of {args.fpr}')
     cutoffs = get_cutoffs(rocs, args.fpr)
 
+    logger.info(f'Filtering class predictions')
     output = filter_predictions(output, cutoffs)
 
     write_csv(output, args)
