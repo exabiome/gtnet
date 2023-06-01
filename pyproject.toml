@@ -43,7 +43,7 @@ dependencies = [
     "pandas>=2.0.1",
     "torch>=2.0.1",
 ]
-version = "0.0.1"
+dynamic = ["version"]
 
 [project.urls]
 "Homepage" = "https://github.com/exabiome/gtnet"
