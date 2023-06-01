@@ -1,5 +1,5 @@
-The Genome Taxonomy Network
-===========================
+Installation
+============
 
 .. Attention:: This page is currently under construction. The information displayed here may be incorrect
 
