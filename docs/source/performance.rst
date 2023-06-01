@@ -5,8 +5,8 @@ GTNet Performance
 
 Taxonomic classifiers fall into two main categories: fast-and-incomplete or slow-and-complete. GTNet strives to be
 both fast and complete. In this page, we demonstrate GTNet capabilities by comparing to state-of-the-art methods
-from each of these categories. We compare to `Sourmash <https://sourmash.readthedocs.io/en/latest/index.html>`, a
-fast-and-incomplete method, and `CAT <https://github.com/dutilh/CAT>`, a slow-and-complete method.
+from each of these categories. We compare to `Sourmash <https://sourmash.readthedocs.io/en/latest/index.html>`_, a
+fast-and-incomplete method, and `CAT <https://github.com/dutilh/CAT>`_, a slow-and-complete method.
 
 Our choice of tools for comparison should not be perceived as a criticism or an endorsement for either tool. These
 tools were chosen based on their ease of use for labelling contigs with the GTDB taxonomy and the algorithmic

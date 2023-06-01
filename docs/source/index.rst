@@ -2,7 +2,7 @@ The Genome Taxonomy Network
 ===========================
 
 The Genome Taxonomy Network, or *GTNet*, is a taxonomic classifier that uses a deep neural network to label DNA
-sequences with the `Genome Taxonomy Database taxonomy <https://gtdb.ecogenomic.org/>`.
+sequences with the `Genome Taxonomy Database taxonomy <https://gtdb.ecogenomic.org/>`_.
 
 
 .. toctree::
