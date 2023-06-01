@@ -72,3 +72,6 @@ tests/coverage/htmlcov
 
 #mypy
 .mypy_cache/
+
+# trained model and taxonomy package
+src/gtnet/deploy_pkg/
