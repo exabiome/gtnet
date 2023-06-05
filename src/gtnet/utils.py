@@ -1,3 +1,4 @@
+import glob
 import hashlib
 import json
 import logging
@@ -40,9 +41,12 @@ class DeployPkg:
     @classmethod
     def check_pkg(cls):
         deploy_dir = resource_filename(__name__, 'deploy_pkg')
-        if not os.path.exists(deploy_dir):
+        total = 0
+        for path in glob.glob(f"{deploy_dir}/*"):
+            total += os.path.getsize(path)
+        if total == 0:
             msg = ("Downloading GTNet deployment package. This will only happen on the first invocation "
-                   "of gtnet predict")
+                   "of gtnet predict or gtnet classify")
             warnings.warn(msg)
             zip_path = resource_filename(__name__, 'deploy_pkg.zip')
             urllib.request.urlretrieve(cls._deploy_pkg_url, zip_path)
