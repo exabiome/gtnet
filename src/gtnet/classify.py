@@ -55,7 +55,7 @@ def classify(argv=None):
     logger.info(f'Getting probability cutoffs for target false-positive rate of {args.fpr}')
     cutoffs = get_cutoffs(rocs, args.fpr)
 
-    logger.info(f'Filtering class predictions')
+    logger.info('Filtering class predictions')
     output = filter_predictions(output, cutoffs)
 
     write_csv(output, args)

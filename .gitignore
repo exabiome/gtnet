@@ -22,7 +22,6 @@ mylab.*.yaml
 *.npy
 *.nwb
 !/tests/back_compat/*.nwb
-manifest.json
 
 # Auto-generated tutorials
 docs/source/tutorials/
@@ -73,5 +72,5 @@ tests/coverage/htmlcov
 #mypy
 .mypy_cache/
 
-# trained model and taxonomy package
-src/gtnet/deploy_pkg/
+# sphinx autogen API docs
+docs/source/gtnet*.rst
