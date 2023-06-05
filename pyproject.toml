@@ -45,6 +45,11 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[tool.setuptools.package-data]
+gtnet = ["deploy_pkg/*.npz",
+         "deploy_pkg/*.pt",
+         "deploy_pkg/manifest.json"]
+
 [project.urls]
 "Homepage" = "https://github.com/exabiome/gtnet"
 "Bug Tracker" = "https://github.com/exabiome/gtnet/issues"
