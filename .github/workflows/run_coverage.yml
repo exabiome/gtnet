@@ -55,6 +55,9 @@ jobs:
       - name: Run tests and generate coverage report
         run: |
           pytest --cov
+          gtnet predict data/small.fna > data/small.raw.test.csv
+          gtnet filter --fpr 0.05 data/small.raw.csv > data/small.tax.test.csv
+          gtnet classify --fpr 0.05 data/small.fna > data/small.tax.test.csv
           python -m coverage xml  # codecov uploader requires xml format
           python -m coverage report -m
 

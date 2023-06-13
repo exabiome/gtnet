@@ -20,8 +20,9 @@ def classify(argv=None):
     argv : Namespace, default=sys.argv
         The command-line arguments to use for running this command
     """
-    desc = "Get taxonomic classification for each sequence in a Fasta file."
-    epi = ()
+    desc = "Get filtered taxonomic classification for each sequence in a Fasta file."
+    epi = ("This command will output a taxonomic classification filtered to a specified false-positive rate "
+           "for each sequence")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
     parser.add_argument('fasta', type=str, help='the Fasta files to do taxonomic classification on')
