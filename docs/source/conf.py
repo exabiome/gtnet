@@ -136,6 +136,10 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # documentation.
 # html_theme_options = {}
 
+html_theme_options = {
+    'logo_only': True,
+}
+
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
