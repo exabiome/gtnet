@@ -14,6 +14,9 @@ Latest Release
 Overall Health
 ==============
 
+.. image:: https://codecov.io/gh/exabiome/gtnet/branch/main/graph/badge.svg?token=AFJH59YZ3U
+    :target: https://codecov.io/gh/exabiome/gtnet
+
 .. image:: https://readthedocs.org/projects/hdmf/badge/?version=stable
     :target: https://hdmf.readthedocs.io/en/stable/?badge=stable
 
