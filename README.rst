@@ -1,42 +1,26 @@
+=====
 GTNet
 =====
-The Genome Taxonomy Network for assigning microbial taxonomy to DNA sequences
+The Genome Taxonomy Network for assigning GTDB microbial taxonomy to DNA sequences.
 
-## Getting started
-Installing GTNet from PyPI
-```bash
-pip install gtnet
-```
+Documentation can be found at https://gtnet.readthedocs.io.
 
-Installing GTNet from source
-```bash
-pip install git+https://github.com/exabiome/gtnet.git
-```
+Latest Release
+==============
 
-## Running GTNet
-Getting taxonomic classifications for all sequences in a Fasta file.
-```bash
-gtnet classify data/small.fna > data/small.tax.csv
-```
+.. image:: https://badge.fury.io/py/gtnet.svg
+    :target: https://badge.fury.io/py/gtnet
 
-### GTNet steps
-GTNet consists of two main steps: 1) get scored predictions of taxonoimc assignments and 2) filter
-scored predictions. The previous command combines these two commands into a single command with a 
-default false-positive rate. The two steps have been separated into two commands for those who
-want to experiment with different false-positive rates.
+Overall Health
+==============
 
-Getting predictions for all sequences in a Fasta file.
-```bash
-gtnet predict data/small.fna > data/small.tax.raw.csv
-```
-The first time you run `predict`, the model file will be downloaded and stored in the
-same directory that the `gtnet` package is installed in. Therefore, for the this to be successful,
-you must have write privileges on the directory that `gtnet` is installed in.
+.. image:: https://readthedocs.org/projects/hdmf/badge/?version=stable
+    :target: https://hdmf.readthedocs.io/en/stable/?badge=stable
 
-Filtering predictions 
-```bash
-gtnet filter --fpr 0.05 data/small.tax.raw.csv > data/small.tax.csv
-```
+Installation
+============
+
+See the `GTNet documentation <https://gtnet.readthedocs.io/en/stable/installation.html>`_.
 
 LICENSE
 =======
@@ -101,5 +85,5 @@ NOTICE.  This Software was developed under funding from the U.S. Department
 of Energy and the U.S. Government consequently retains certain rights.  As
 such, the U.S. Government has been granted for itself and others acting on
 its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the
-Software to reproduce, distribute copies to the public, prepare derivative 
+Software to reproduce, distribute copies to the public, prepare derivative
 works, and perform publicly and display publicly, and to permit others to do so.
