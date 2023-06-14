@@ -1,5 +1,6 @@
 import glob
 import hashlib
+from importlib.resources import files
 import json
 import logging
 import os
@@ -9,7 +10,6 @@ import warnings
 import zipfile
 
 import numpy as np
-from pkg_resources import resource_filename
 import torch
 import torch.nn as nn
 
@@ -40,7 +40,7 @@ class DeployPkg:
 
     @classmethod
     def check_pkg(cls):
-        deploy_dir = resource_filename(__name__, 'deploy_pkg')
+        deploy_dir = files(__package__).joinpath('deploy_pkg')
         total = 0
         for path in glob.glob(f"{deploy_dir}/*"):
             total += os.path.getsize(path)
@@ -48,7 +48,7 @@ class DeployPkg:
             msg = ("Downloading GTNet deployment package. This will only happen on the first invocation "
                    "of gtnet predict or gtnet classify")
             warnings.warn(msg)
-            zip_path = resource_filename(__name__, 'deploy_pkg.zip')
+            zip_path = files(__package__).joinpath('deploy_pkg.zip')
             urllib.request.urlretrieve(cls._deploy_pkg_url, zip_path)
             dl_checksum = hashlib.md5(open(zip_path,'rb').read()).hexdigest()
             if dl_checksum != cls._checksum:
