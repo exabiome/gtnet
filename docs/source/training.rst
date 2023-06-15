@@ -18,7 +18,7 @@ currently carried hosted on `OSF <https://osf.io/cwaqs/>`_.
 
 Updating the gtnet software
 ---------------------------
-After training a new model and packaging the model, the DeployPkg class will need to be updated with the new URL
-and checksum of the new deployment package. This can be done starting around
+After training a new model and packaging the model, the :py:class:`~gtnet.utils.DeployPkg` class will need to be
+updated with the new URL and checksum of the new deployment package. This can be done starting around
 `here <https://github.com/exabiome/gtnet/blob/b9ba8a4fb1a63affd9047005c92c12799df9c2b7/src/gtnet/utils.py#L36>`_
 in the code.
