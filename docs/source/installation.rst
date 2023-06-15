@@ -22,4 +22,4 @@ For example, if you would like to run PyTorch with CUDA Toolkit 11.8, you can ru
   conda create -n gtnet-env
   conda activate gtnet-env
   conda install pytorch pytorch-cuda=11.8 -c pytorch -c nvidia
-  pip install --no-deps gtnet
+  pip install gtnet
