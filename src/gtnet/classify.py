@@ -26,6 +26,7 @@ def classify(argv=None):
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
     parser.add_argument('fasta', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('-s', '--seqs', action='store_true', help='provide classification for sequences')
     parser.add_argument('-c', '--n_chunks', type=int, default=DEFAULT_N_CHUNKS,
                         help='the number of sequence chunks to process at a time')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
@@ -44,13 +45,13 @@ def classify(argv=None):
 
     device = check_device(args)
 
-    model, conf_models, train_conf, vocab, rocs = load_deploy_pkg(for_predict=True, for_filter=True)
+    model, conf_models, train_conf, vocab, rocs = load_deploy_pkg(for_predict=True, for_filter=True, contigs=args.seqs)
 
     window = train_conf['window']
     step = train_conf['step']
 
     logger.info(f'Getting class predictions for each contig in {args.fasta}')
-    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab,
+    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab, seqs=args.seqs,
                                       device=device, logger=logger)
 
     logger.info(f'Getting probability cutoffs for target false-positive rate of {args.fpr}')

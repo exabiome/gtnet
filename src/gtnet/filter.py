@@ -39,6 +39,7 @@ def filter(argv=None):
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
     parser.add_argument('csv', nargs='?', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('-s', '--seqs', action='store_true', help='classifications in csv are for sequences')
     parser.add_argument('-f', '--fpr', default=0.05, type=float, help='the false-positive rate to classify to')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
@@ -53,7 +54,7 @@ def filter(argv=None):
 
     logger = get_logger()
 
-    rocs = load_deploy_pkg(for_filter=True)
+    rocs = load_deploy_pkg(for_filter=True, contigs=args.seqs)
 
     cutoffs = get_cutoffs(rocs, args.fpr)
 
