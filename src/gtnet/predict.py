@@ -147,22 +147,10 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, se
 
     if not seqs:
         logger.info(f'Calculating classifications for bins')
-        tmpd = dict()
-        if torch.backends.mkl.is_available():
-            labels = [tmpd.setdefault(k, len(tmpd)) for k in filepaths]
-            filepaths = list(tmpd.keys())
-            groupby = torch.sparse_coo_tensor(torch.tensor([labels, list(range(len(labels)))]),
-                                              torch.ones(len(labels)),
-                                              device=device).to_sparse_csr()
-            n_ctgs = groupby.todense().sum(dim=1).to(int).tolist()
 
-            all_levels_aggregated = groupby.matmul(all_levels_aggregated)
-            total_chunks = groupby.matmul(total_chunks)
-        else:
-            # Note: this only works in Python >=3.6, because Counter remembers insertion order
-            ctr = Counter(filepaths)
-            n_ctgs = list(ctr.values())
-            filepaths = list(ctr.keys())
+        ctr = Counter(filepaths)
+        n_ctgs = list(ctr.values())
+        filepaths = list(ctr.keys())
 
         max_len = list()
         l50 = list()
