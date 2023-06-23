@@ -38,12 +38,12 @@ class DeployPkg:
 
     _checksum = "623aa991fb0d74e874b7d0da25496c26"
 
+    _manifest_name = 'manifest.json'
+
     @classmethod
     def check_pkg(cls):
         deploy_dir = files(__package__).joinpath('deploy_pkg')
-        total = 0
-        for path in glob.glob(f"{deploy_dir}/*"):
-            total += os.path.getsize(path)
+        total = os.path.getsize(os.path.join(deploy_dir, cls._manifest_name))
         if total == 0:
             msg = ("Downloading GTNet deployment package. This will only happen on the first invocation "
                    "of gtnet predict or gtnet classify")
@@ -71,7 +71,7 @@ class DeployPkg:
     @property
     def manifest(self):
         if self._manifest is None:
-            with open(self.path('manifest.json'), 'r') as f:
+            with open(self.path(self._manifest_name), 'r') as f:
                 self._manifest = json.load(f)
         return self._manifest
 
