@@ -34,9 +34,9 @@ def get_logger():
 class DeployPkg:
     """A class to handle loading and manipulating the deployment package"""
 
-    _deploy_pkg_url = "https://osf.io/download/mwgb9/"
+    _deploy_pkg_url = "https://osf.io/download/qf46x/"
 
-    _checksum = "0245fcf825bfe4de0770fcb46798ca90"
+    _checksum = "623aa991fb0d74e874b7d0da25496c26"
 
     @classmethod
     def check_pkg(cls):
