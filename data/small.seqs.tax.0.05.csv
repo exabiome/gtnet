@@ -1,0 +1,4 @@
+file,ID,domain,phylum,class,order,family,genus,species
+data/small.fna,AAAC01000001.1,d__Bacteria,p__Firmicutes,c__Bacilli,o__Bacillales,f__Bacillaceae_G,g__Bacillus_A,
+data/small.fna,AE011190.1,,,,,,,
+data/small.fna,AE011191.1,d__Bacteria,,,,,,

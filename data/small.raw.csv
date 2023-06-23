@@ -1,4 +1,2 @@
-ID,domain,domain_prob,phylum,phylum_prob,class,class_prob,order,order_prob,family,family_prob,genus,genus_prob,species,species_prob
-AAAC01000001.1,d__Bacteria,0.92493016,p__Firmicutes,0.9686205,c__Bacilli,0.96250373,o__Bacillales,0.97850364,f__Bacillaceae_G,0.97221136,g__Bacillus_A,0.985249,s__Bacillus_A thuringiensis,0.45970166
-AE011190.1,d__Bacteria,0.7773866,p__Firmicutes,0.7861459,c__Bacilli,0.7775143,o__Bacillales,0.31985036,f__Bacillaceae_G,0.2585766,g__Bacillus_A,0.45360962,s__Bacillus_A thuringiensis,0.19787389
-AE011191.1,d__Bacteria,0.7986983,p__Firmicutes,0.8659906,c__Bacilli,0.86254656,o__Bacillales,0.681745,f__Bacillaceae_G,0.6001527,g__Bacillus_A,0.78373003,s__Bacillus_A thuringiensis,0.3619854
+file,domain,domain_prob,phylum,phylum_prob,class,class_prob,order,order_prob,family,family_prob,genus,genus_prob,species,species_prob
+data/small.fna,d__Bacteria,0.9684391,p__Firmicutes,0.9986811,c__Bacilli,0.9683148,o__Bacillales,0.98408806,f__Bacillaceae_G,0.99721485,g__Bacillus_A,0.9942883,s__Bacillus_A thuringiensis,0.43458176
