@@ -39,7 +39,6 @@ def filter(argv=None):
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
     parser.add_argument('csv', nargs='?', type=str, help='the Fasta files to do taxonomic classification on')
-    parser.add_argument('-s', '--seqs', action='store_true', help='classifications in csv are for sequences')
     parser.add_argument('-f', '--fpr', default=0.05, type=float, help='the false-positive rate to classify to')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
@@ -54,11 +53,18 @@ def filter(argv=None):
 
     logger = get_logger()
 
-    rocs = load_deploy_pkg(for_filter=True, contigs=args.seqs)
+    df = pd.read_csv(args.csv)
+
+    if 'ID' in df.columns:
+        seqs = True
+        df = df.set_index(['file', 'ID'])
+    else:
+        df = df.set_index('file')
+        seqs = False
+
+    rocs = load_deploy_pkg(for_filter=True, contigs=seqs)
 
     cutoffs = get_cutoffs(rocs, args.fpr)
-
-    df = pd.read_csv(args.csv, index_col='ID')
 
     output = filter_predictions(df, cutoffs)
     write_csv(output, args)
