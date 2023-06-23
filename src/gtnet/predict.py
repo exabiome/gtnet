@@ -146,7 +146,7 @@ def run_torchscript_inference(fastas, model, conf_models, window, step, vocab, s
     del aggregated
 
     if not seqs:
-        logger.info(f'Calculating classifications for bins')
+        logger.info('Calculating classifications for bins')
 
         ctr = Counter(filepaths)
         n_ctgs = list(ctr.values())
