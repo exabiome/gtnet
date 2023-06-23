@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 import logging
 from time import time
 
@@ -28,7 +29,7 @@ def predict(argv=None):
            "'filter' command. See the 'classify' command for getting pre-filtered classifications")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
-    parser.add_argument('fasta', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('fasta', type=str, nargs='+', help='the Fasta files to do taxonomic classification on')
     parser.add_argument('-s', '--seqs', action='store_true', help='provide classification for sequences')
     parser.add_argument('-c', '--n_chunks', type=int, default=DEFAULT_N_CHUNKS,
                         help='the number of sequence chunks to process at a time')
@@ -147,27 +148,48 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, se
     if not seqs:
         logger.info(f'Calculating classifications for bins')
         tmpd = dict()
-        labels = [tmpd.setdefault(k, len(tmpd)) for k in filepaths]
-        filepaths = list(tmpd.keys())
-        groupby = torch.sparse_coo_tensor(torch.tensor([labels, list(range(len(labels)))]),
-                                          torch.ones(len(labels)),
-                                          device=device).to_sparse_csr()
-        all_levels_aggregated = groupby.matmul(all_levels_aggregated)
-        total_chunks = groupby.matmul(total_chunks)
-        n_ctgs = groupby.to_dense().sum(dim=1).to(int).tolist()
+        if torch.backends.mkl.is_available():
+            labels = [tmpd.setdefault(k, len(tmpd)) for k in filepaths]
+            filepaths = list(tmpd.keys())
+            groupby = torch.sparse_coo_tensor(torch.tensor([labels, list(range(len(labels)))]),
+                                              torch.ones(len(labels)),
+                                              device=device).to_sparse_csr()
+            n_ctgs = groupby.todense().sum(dim=1).to(int).tolist()
+
+            all_levels_aggregated = groupby.matmul(all_levels_aggregated)
+            total_chunks = groupby.matmul(total_chunks)
+        else:
+            # Note: this only works in Python >=3.6, because Counter remembers insertion order
+            ctr = Counter(filepaths)
+            n_ctgs = list(ctr.values())
+            filepaths = list(ctr.keys())
 
         max_len = list()
         l50 = list()
         lengths = torch.tensor(lengths)
+
+        tmp_chunks = list()
+        tmp_aggregated = list()
+
         s = 0
         for n in n_ctgs:
             e = s + n
-            print(s, e)
             tmp_lens = lengths[s:e].sort(descending=True).values
             max_len.append(tmp_lens[0])
             csum = torch.cumsum(tmp_lens, 0)
             l50.append(tmp_lens[torch.where(csum > (csum[-1] * 0.5))[0][0]])
+            tmp_aggregated.append(all_levels_aggregated[s:e].sum(axis=0))
+            tmp_chunks.append(total_chunks[s:e].sum())
             s = e
+
+        del total_chunks
+        total_chunks = torch.row_stack(tmp_chunks)
+        del tmp_chunks
+
+        del all_levels_aggregated
+        all_levels_aggregated = torch.row_stack(tmp_aggregated)
+        del tmp_aggregated
+
 
         features = torch.tensor([n_ctgs, l50, max_len], device=device).T
         output_data = {'file': filepaths}
