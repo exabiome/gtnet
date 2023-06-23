@@ -29,7 +29,7 @@ def predict(argv=None):
            "'filter' command. See the 'classify' command for getting pre-filtered classifications")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
-    parser.add_argument('fasta', type=str, nargs='+', help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('fastas', type=str, nargs='+', help='the Fasta files to do taxonomic classification on')
     parser.add_argument('-s', '--seqs', action='store_true', help='provide classification for sequences')
     parser.add_argument('-c', '--n_chunks', type=int, default=DEFAULT_N_CHUNKS,
                         help='the number of sequence chunks to process at a time')
@@ -53,7 +53,7 @@ def predict(argv=None):
     window = train_conf['window']
     step = train_conf['step']
 
-    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab, seqs=args.seqs,
+    output = run_torchscript_inference(args.fastas, model, conf_models, window, step, vocab, seqs=args.seqs,
                                        device=device, logger=logger)
 
     # write out data
@@ -63,14 +63,14 @@ def predict(argv=None):
     logger.info(f'Took {after - before:.1f} seconds')
 
 
-def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, seqs=False, n_chunks=DEFAULT_N_CHUNKS,
+def run_torchscript_inference(fastas, model, conf_models, window, step, vocab, seqs=False, n_chunks=DEFAULT_N_CHUNKS,
                               device=torch.device('cpu'), logger=None):
     """Run Torchscript inference
 
     Parameters
     ----------
 
-    fasta : str
+    fastas : str
         The path to the Fasta file with sequences to do inference on
 
     model : RecursiveScriptModule
@@ -104,7 +104,7 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, se
         logger.setLevel(logging.CRITICAL)
 
     encoder = FastaSequenceEncoder(window, step, vocab=vocab, device=device)
-    reader = FastaReader(encoder, fasta)
+    reader = FastaReader(encoder, *fastas)
 
     model = model.to(device)
 
@@ -119,7 +119,7 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, se
     torch.set_grad_enabled(False)
 
 
-    logger.info(f'Calculating classifications for all sequences in {fasta}')
+    logger.info(f'Calculating classifications for all sequences in {", ".join(fastas)}')
     for file_path, seq_name, seq_len, seq_chunks in reader:
         seqnames.append(seq_name)
         lengths.append(seq_len)
@@ -171,13 +171,12 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, se
             s = e
 
         del total_chunks
-        total_chunks = torch.row_stack(tmp_chunks)
+        total_chunks = torch.tensor(tmp_chunks)
         del tmp_chunks
 
         del all_levels_aggregated
         all_levels_aggregated = torch.row_stack(tmp_aggregated)
         del tmp_aggregated
-
 
         features = torch.tensor([n_ctgs, l50, max_len], device=device).T
         output_data = {'file': filepaths}
