@@ -1,4 +1,3 @@
-import glob
 import hashlib
 from importlib.resources import files
 import json

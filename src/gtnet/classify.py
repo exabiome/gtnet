@@ -25,7 +25,7 @@ def classify(argv=None):
            "for each sequence")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
-    parser.add_argument('fasta', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('fastas', type=str, nargs='+', help='the Fasta files to do taxonomic classification on')
     parser.add_argument('-s', '--seqs', action='store_true', help='provide classification for sequences')
     parser.add_argument('-c', '--n_chunks', type=int, default=DEFAULT_N_CHUNKS,
                         help='the number of sequence chunks to process at a time')
@@ -50,8 +50,8 @@ def classify(argv=None):
     window = train_conf['window']
     step = train_conf['step']
 
-    logger.info(f'Getting class predictions for each contig in {args.fasta}')
-    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab, seqs=args.seqs,
+    logger.info(f'Getting class predictions for each contig in {",".join(args.fastas)}')
+    output = run_torchscript_inference(args.fastas, model, conf_models, window, step, vocab, seqs=args.seqs,
                                       device=device, logger=logger)
 
     logger.info(f'Getting probability cutoffs for target false-positive rate of {args.fpr}')
