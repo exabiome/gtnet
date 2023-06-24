@@ -1,2 +1,2 @@
 file,domain,domain_prob,phylum,phylum_prob,class,class_prob,order,order_prob,family,family_prob,genus,genus_prob,species,species_prob
-data/small.fna,d__Bacteria,0.9684391,p__Firmicutes,0.9986811,c__Bacilli,0.9683148,o__Bacillales,0.98408806,f__Bacillaceae_G,0.99721485,g__Bacillus_A,0.9942883,s__Bacillus_A thuringiensis,0.43458176
+data/small.fna,d__Bacteria,0.9684392,p__Firmicutes,0.9986811,c__Bacilli,0.96831495,o__Bacillales,0.98408806,f__Bacillaceae_G,0.99721485,g__Bacillus_A,0.9942883,s__Bacillus_A thuringiensis,0.4345817
