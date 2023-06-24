@@ -5,7 +5,28 @@ GTNet comes with multiple commands. The simplest way of running GTNet is to use 
 
 .. code:: bash
 
-  gtnet classify data/small.fna > data/small.tax.csv
+  gtnet classify genome.fna > genome.tax.csv
+
+This command generates one classification for the entire file, and should be used to get classification for metagenome bin.
+Use the ``-s/--seqs`` flag to get classifications for the individual sequences in ``genome.fna``
+
+.. Attention::
+   The first time you run ``classify`` and ``predict`` (see below), the model file will be downloaded and stored in the same
+   directory that the *gtnet* package is installed in. Therefore, for the this to be successful, you must have write privileges
+   on the directory that *gtnet* is installed in.
+
+
+.. code:: bash
+
+  gtnet classify --seqs genome.fna > genome.seqs.tax.csv
+
+
+The ``classify`` command can take multiple fasta files, and will produce line per file in the output. For example, the following
+command will contain two lines:
+
+.. code:: bash
+
+  gtnet classify bin1.fna bin2.fna > bins.tax.csv
 
 
 GTNet steps
@@ -18,15 +39,12 @@ want to experiment with different false-positive rates.
 Getting predictions
 ^^^^^^^^^^^^^^^^^^^
 
-To get predictinos for all sequences in a Fasta file, use the ``predict`` subcommand.
+To get predictinos for all sequences in a Fasta file, use the ``predict`` subcommand. This command also accepts multiple fasta files
+and the ``-s/--seqs`` argument for getting predictions for individual sequences.
 
 .. code:: bash
 
-  gtnet predict data/small.fna > data/small.tax.raw.csv
-
-The first time you run ``predict``, the model file will be downloaded and stored in the
-same directory that the *gtnet* package is installed in. Therefore, for the this to be successful,
-you must have write privileges on the directory that *gtnet* is installed in.
+  gtnet predict genome.fna > genome.tax.raw.csv
 
 Filtering predictions
 ^^^^^^^^^^^^^^^^^^^^^
@@ -36,8 +54,9 @@ to a desired false-positive rate.
 
 .. code:: bash
 
-  gtnet filter --fpr 0.05 data/small.tax.raw.csv > data/small.tax.csv
+  gtnet filter --fpr 0.05 genome.tax.raw.csv > genome.tax.csv
 
+The ``filter`` command supports predictions for whole files and individual sequences.
 
 GPU acceleration
 ----------------
