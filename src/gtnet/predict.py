@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 import logging
 from time import time
 
@@ -28,7 +29,8 @@ def predict(argv=None):
            "'filter' command. See the 'classify' command for getting pre-filtered classifications")
 
     parser = argparse.ArgumentParser(description=desc, epilog=epi)
-    parser.add_argument('fasta', type=str, help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('fastas', type=str, nargs='+', help='the Fasta files to do taxonomic classification on')
+    parser.add_argument('-s', '--seqs', action='store_true', help='provide classification for sequences')
     parser.add_argument('-c', '--n_chunks', type=int, default=DEFAULT_N_CHUNKS,
                         help='the number of sequence chunks to process at a time')
     parser.add_argument('-o', '--output', type=str, default=None, help='the output file to save classifications to')
@@ -46,12 +48,13 @@ def predict(argv=None):
 
     device = check_device(args)
 
-    model, conf_models, train_conf, vocab = load_deploy_pkg(for_predict=True)
+    model, conf_models, train_conf, vocab = load_deploy_pkg(for_predict=True, contigs=args.seqs)
 
     window = train_conf['window']
     step = train_conf['step']
 
-    output = run_torchscript_inference(args.fasta, model, conf_models, window, step, vocab, device=device)
+    output = run_torchscript_inference(args.fastas, model, conf_models, window, step, vocab, seqs=args.seqs,
+                                       device=device, logger=logger)
 
     # write out data
     write_csv(output, args)
@@ -60,14 +63,14 @@ def predict(argv=None):
     logger.info(f'Took {after - before:.1f} seconds')
 
 
-def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_chunks=DEFAULT_N_CHUNKS,
+def run_torchscript_inference(fastas, model, conf_models, window, step, vocab, seqs=False, n_chunks=DEFAULT_N_CHUNKS,
                               device=torch.device('cpu'), logger=None):
     """Run Torchscript inference
 
     Parameters
     ----------
 
-    fasta : str
+    fastas : str
         The path to the Fasta file with sequences to do inference on
 
     model : RecursiveScriptModule
@@ -101,7 +104,7 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_
         logger.setLevel(logging.CRITICAL)
 
     encoder = FastaSequenceEncoder(window, step, vocab=vocab, device=device)
-    reader = FastaReader(encoder, fasta)
+    reader = FastaReader(encoder, *fastas)
 
     model = model.to(device)
 
@@ -109,12 +112,14 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_
 
     seqnames = list()
     lengths = list()
+    total_chunks = list()
     filepaths = list()
     aggregated = list()
 
     torch.set_grad_enabled(False)
 
-    logger.info(f'Calculating classifications for all sequences in {fasta}')
+
+    logger.info(f'Calculating classifications for all sequences in {", ".join(fastas)}')
     for file_path, seq_name, seq_len, seq_chunks in reader:
         seqnames.append(seq_name)
         lengths.append(seq_len)
@@ -124,24 +129,64 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_
                       f'{seq_chunks.shape[1] * 2} chunks, {lengths[-1]} bases'))
         outputs = torch.zeros(output_size, device=device)   # the output from the network for a single sequence
         # sum network outputs from all chunks
-        for s in range(0, len(seq_chunks), n_chunks):
+        for s in range(0, seq_chunks.shape[1], n_chunks):
             e = s + n_chunks
             outputs += model(seq_chunks[0, s:e]).sum(dim=0)
             outputs += model(seq_chunks[1, s:e]).sum(dim=0)
         # divide by the number of seq_chunks we processed to get a mean output
-        outputs /= (seq_chunks.shape[1] * 2)
+        aggregated.append(outputs)
+        total_chunks.append(seq_chunks.shape[1] * 2.)
+
         del seq_chunks
 
-        aggregated.append(outputs)
-
-    lengths = torch.tensor(lengths, device=device)
-
+    total_chunks = torch.tensor(total_chunks, device=device)
 
     # aggregate everything we just pulled from the fasta file
     all_levels_aggregated = torch.row_stack(aggregated)
     del aggregated
 
-    output_data = {'ID': seqnames}
+    if not seqs:
+        logger.info('Calculating classifications for bins')
+
+        ctr = Counter(filepaths)
+        n_ctgs = list(ctr.values())
+        filepaths = list(ctr.keys())
+
+        max_len = list()
+        l50 = list()
+        lengths = torch.tensor(lengths)
+
+        tmp_chunks = list()
+        tmp_aggregated = list()
+
+        s = 0
+        for n in n_ctgs:
+            e = s + n
+            tmp_lens = lengths[s:e].sort(descending=True).values
+            max_len.append(tmp_lens[0])
+            csum = torch.cumsum(tmp_lens, 0)
+            l50.append(tmp_lens[torch.where(csum > (csum[-1] * 0.5))[0][0]])
+            tmp_aggregated.append(all_levels_aggregated[s:e].sum(axis=0))
+            tmp_chunks.append(total_chunks[s:e].sum())
+            s = e
+
+        del total_chunks
+        total_chunks = torch.tensor(tmp_chunks)
+        del tmp_chunks
+
+        del all_levels_aggregated
+        all_levels_aggregated = torch.row_stack(tmp_aggregated)
+        del tmp_aggregated
+
+        features = torch.tensor([n_ctgs, l50, max_len], device=device).T
+        output_data = {'file': filepaths}
+    else:
+        features = torch.tensor(lengths, device=device)[:, None]
+        output_data = {'file': filepaths, 'ID': seqnames}
+
+
+    all_levels_aggregated = ((all_levels_aggregated.T) / total_chunks).T
+    indices = list(output_data.keys())
 
     s = 0
     for lvl, e in zip(model.levels, model.parse):
@@ -163,13 +208,13 @@ def run_torchscript_inference(fasta, model, conf_models, window, step, vocab, n_
 
         # build input matrix for confidence model
         logger.debug('Calculating confidence probabilities')
-        conf_input = torch.column_stack([lengths, maxprobs])
+        conf_input = torch.column_stack([features, maxprobs])
 
         output_data[f'{lvl}_prob'] = conf_model(conf_input).cpu().numpy().squeeze()
 
         # set next left bound for all_levels_aggregated
         s = e
 
-    output = pd.DataFrame(output_data).set_index('ID')
+    output = pd.DataFrame(output_data).set_index(indices)
 
     return output

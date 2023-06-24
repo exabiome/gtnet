@@ -47,17 +47,33 @@ jobs:
         run: |
           pytest
 
-      - name: Run GTNet Predict
+      - name: Run GTNet Predict on Bins
         run: |
           gtnet predict data/small.fna > data/small.raw.test.csv
           python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.raw.csv"), pd.read_csv("data/small.raw.test.csv"), check_exact=False, atol=1e-4)'
 
-      - name: Run GTNet Filter
+      - name: Run GTNet Filter on Bins
         run: |
           gtnet filter --fpr 0.05 data/small.raw.csv > data/small.tax.test.csv
           python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.tax.0.05.csv"), pd.read_csv("data/small.tax.test.csv"), check_exact=False, atol=1e-4)'
 
-      - name: Run GTNet Classify
+      - name: Run GTNet Classify on Bins
         run: |
           gtnet classify --fpr 0.05 data/small.fna > data/small.tax.test.csv
           python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.tax.0.05.csv"), pd.read_csv("data/small.tax.test.csv"), check_exact=False, atol=1e-4)'
+
+      - name: Run GTNet Predict on Contigs
+        run: |
+          gtnet predict --seqs data/small.fna > data/small.seqs.raw.test.csv
+          python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.seqs.raw.csv"), pd.read_csv("data/small.seqs.raw.test.csv"), check_exact=False, atol=1e-4)'
+
+      - name: Run GTNet Filter on Contigs
+        run: |
+          gtnet filter --fpr 0.05 data/small.seqs.raw.csv > data/small.seqs.tax.test.csv
+          python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.seqs.tax.0.05.csv"), pd.read_csv("data/small.seqs.tax.test.csv"), check_exact=False, atol=1e-4)'
+
+      - name: Run GTNet Classify on Bins
+        run: |
+          gtnet classify --seqs --fpr 0.05 data/small.fna > data/small.seqs.tax.test.csv
+          python -c 'import pandas as pd; pd.testing.assert_frame_equal(pd.read_csv("data/small.seqs.tax.0.05.csv"), pd.read_csv("data/small.seqs.tax.test.csv"), check_exact=False, atol=1e-4)'
+

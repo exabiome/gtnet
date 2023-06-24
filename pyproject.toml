@@ -44,8 +44,9 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools.package-data]
-gtnet = ["deploy_pkg/*.npz",
-         "deploy_pkg/*.pt",
+gtnet = ["deploy_pkg/{bins,contigs}/*.npz",
+         "deploy_pkg/{bins,contigs}/*.pt",
+         "deploy_pkg/last.pt",
          "deploy_pkg/manifest.json"]
 
 [project.urls]

@@ -53,11 +53,18 @@ def filter(argv=None):
 
     logger = get_logger()
 
-    rocs = load_deploy_pkg(for_filter=True)
+    df = pd.read_csv(args.csv)
+
+    if 'ID' in df.columns:
+        seqs = True
+        df = df.set_index(['file', 'ID'])
+    else:
+        df = df.set_index('file')
+        seqs = False
+
+    rocs = load_deploy_pkg(for_filter=True, contigs=seqs)
 
     cutoffs = get_cutoffs(rocs, args.fpr)
-
-    df = pd.read_csv(args.csv, index_col='ID')
 
     output = filter_predictions(df, cutoffs)
     write_csv(output, args)
