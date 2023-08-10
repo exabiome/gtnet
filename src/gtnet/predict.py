@@ -171,7 +171,7 @@ def run_torchscript_inference(fastas, model, conf_models, window, step, vocab, s
             s = e
 
         del total_chunks
-        total_chunks = torch.tensor(tmp_chunks)
+        total_chunks = torch.tensor(tmp_chunks, device=device)
         del tmp_chunks
 
         del all_levels_aggregated
