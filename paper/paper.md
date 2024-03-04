@@ -45,8 +45,8 @@ contigs with taxonomic labels from the Genome Taxonomy Database.
 
 # Statement of need
 
-`gtnet` [@gtnet] is a Python package and command-line utility built on top of `GTNet`. The purpose of thise software
-is to make the predictive capabilities of the GTNet easily accesible to the meteagenomics community. 
+`gtnet` [@gtnet] is a Python package and command-line utility built on top of `GTNet`. The purpose of this software
+is to make the predictive capabilities of the GTNet easily accessible to the meteagenomics community. 
 
 In addition to deploying GTNet, the `gtnet` software seeks to address other outstanding issues in the
 field. Many taxonomic classification tools are still released as source code in tarball formats, require
