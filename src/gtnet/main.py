@@ -32,7 +32,7 @@ def print_help():
     for c, f in command_dict.items():
         nspaces = 16 - len(c)
         print(f'    {c}' + ' '*nspaces + f.doc, file=sio)
-    print('    help            print this usage statememt\n', file=sio)
+    print('    help            print this usage statement\n', file=sio)
     sys.stdout.write(sio.getvalue())
 
 
