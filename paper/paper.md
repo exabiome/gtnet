@@ -3,33 +3,18 @@ title: 'gtnet: A Python package for taxonomic labelling with the Genome Taxonomy
 tags:
   - Python
   - metagenomics
-  - deep learning
+  - microbial taxonomy
+  - taxonomic classification
+  - neural network
 authors:
   - name: Andrew J. Tritt
     orcid: 0000-0002-1617-449X
     equal-contrib: false
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Kristofer Bouchard
-    orcid: 0000-0002-1974-4603
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
 affiliations:
  - name: Applied Math and Computational Research Division, Lawrence Berkeley National Laboratory, Berkeley, CA, USA
    index: 1
- - name: Scientific Data Division, Lawrence Berkeley National Laboratory, Berkeley, CA, USA.
-   index: 2
- - name: Biological Systems and Engineering Division, Lawrence Berkeley National Laboratory, Berkeley, CA, USA
-   index: 3
- - name: Helen Wills Neuroscience Institute and Redwood Center for Theoretical Neuroscience, University of California Berkeley, Berkeley, CA, USA.
-   index: 4
-date: 13 August 2017
+date: 04 March 2024
 bibliography: paper.bib
 ---
 
