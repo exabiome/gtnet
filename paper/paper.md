@@ -10,7 +10,7 @@ authors:
   - name: Andrew J. Tritt
     orcid: 0000-0002-1617-449X
     equal-contrib: false
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: 1
 affiliations:
  - name: Applied Math and Computational Research Division, Lawrence Berkeley National Laboratory, Berkeley, CA, USA
    index: 1
